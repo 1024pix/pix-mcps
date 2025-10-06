@@ -205,27 +205,81 @@ for await (const message of query({
 
 ## Docker Support
 
-Each MCP server can be containerized for easy deployment:
+MCP servers can run as Docker containers for easy deployment and isolation. This allows developers to:
+- Run MCP servers in isolated environments
+- Avoid Node.js version conflicts
+- Deploy to production with consistent environments
+- Run multiple MCP servers simultaneously
 
-```dockerfile
-FROM node:20-alpine
+### Building and Running with Docker Compose
 
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY . .
-
-CMD ["node", "dist/index.js"]
-```
-
-Run with Docker:
+The easiest way to run MCP servers with Docker:
 
 ```bash
-docker build -t pix-mcp-server .
-docker run -d --env-file .env pix-mcp-server
+# Build the container
+docker-compose build pix-jira
+
+# Start the container in background
+docker-compose up -d pix-jira
+
+# Check the container is running
+docker-compose ps
+
+# View logs
+docker-compose logs -f pix-jira
+
+# Stop the container
+docker-compose down
 ```
+
+### Building and Running with Docker CLI
+
+For more control, use Docker commands directly:
+
+```bash
+# Build the image
+docker build -t pix-mcp/jira:latest .
+
+# Run the container
+docker run -d \
+  --name pix-jira-mcp \
+  --env-file .env \
+  -i -t \
+  pix-mcp/jira:latest
+
+# Check container status
+docker ps
+
+# View logs
+docker logs -f pix-jira-mcp
+
+# Stop the container
+docker stop pix-jira-mcp
+docker rm pix-jira-mcp
+```
+
+### Connecting Claude to Docker Container
+
+Once the container is running, update your MCP configuration to use the containerized server. Copy `.mcp.docker.json` to `.mcp.json` or merge the configuration:
+
+```json
+{
+  "mcpServers": {
+    "pix-jira-docker": {
+      "command": "docker",
+      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"],
+      "env": {
+        "JIRA_BASE_URL": "https://YOURWORKSPACE.atlassian.net",
+        "JIRA_EMAIL": "${JIRA_EMAIL}",
+        "JIRA_API_TOKEN": "${JIRA_API_TOKEN}",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+**Note**: The container must be running before Claude can connect to it. Environment variables can be passed through the MCP config or set in the container's `.env` file.
 
 ## Testing
 

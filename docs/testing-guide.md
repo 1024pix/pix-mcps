@@ -9,6 +9,7 @@ This guide explains how to manually test MCP servers to ensure they work correct
   - [Method 1: Quick Test with Test Script](#method-1-quick-test-with-test-script)
   - [Method 2: Testing with Claude Code](#method-2-testing-with-claude-code)
   - [Method 3: Manual API Testing](#method-3-manual-api-testing)
+  - [Method 4: Testing with Docker](#method-4-testing-with-docker)
 - [Verifying Custom Fields](#verifying-custom-fields)
 - [Common Issues and Troubleshooting](#common-issues-and-troubleshooting)
 - [Testing Checklist](#testing-checklist)
@@ -21,6 +22,7 @@ Before testing, ensure you have:
 2. **Dependencies installed**: Run `npm install` from the monorepo root
 3. **Built packages**: Run `npm run build` from the monorepo root
 4. **Environment variables configured**: See [Configuration](#configuration)
+5. **Docker and Docker Compose** (optional, only for Method 4): For containerized testing
 
 ### Configuration
 
@@ -302,6 +304,115 @@ testJiraApi().catch(console.error);
 ```bash
 node --import tsx servers/pix-jira/api-test.ts
 ```
+
+### Method 4: Testing with Docker
+
+Run the MCP server in a Docker container for isolated testing.
+
+**Step 1: Build the Docker image**
+
+```bash
+# From the monorepo root
+docker-compose build pix-jira
+
+# Or using Docker CLI directly
+docker build -t pix-mcp/jira:latest .
+```
+
+**Step 2: Start the container**
+
+```bash
+# Using docker-compose (recommended)
+docker-compose up -d pix-jira
+
+# Or using Docker CLI
+docker run -d \
+  --name pix-jira-mcp \
+  --env-file .env \
+  -i -t \
+  pix-mcp/jira:latest
+```
+
+**Step 3: Verify the container is running**
+
+```bash
+# Check container status
+docker-compose ps
+# or
+docker ps | grep pix-jira
+
+# View container logs
+docker-compose logs -f pix-jira
+# or
+docker logs -f pix-jira-mcp
+```
+
+**Step 4: Test the containerized server**
+
+You can test the container using `docker exec`:
+
+```bash
+# Get issue information via container
+docker exec -i pix-jira-mcp node -e "
+const { JiraClient } = require('./dist/lib/jira-client.js');
+const { formatIssue } = require('./dist/lib/issue-formatter.js');
+
+const config = {
+  jiraBaseUrl: process.env.JIRA_BASE_URL,
+  jiraEmail: process.env.JIRA_EMAIL,
+  jiraApiToken: process.env.JIRA_API_TOKEN,
+};
+
+const client = new JiraClient(config);
+client.getIssue('PROJ-19670').then(issue => {
+  console.log(formatIssue(issue));
+}).catch(console.error);
+"
+```
+
+**Step 5: Connect Claude to the container**
+
+Update your `.mcp.json` to use the Docker container:
+
+```json
+{
+  "mcpServers": {
+    "pix-jira-docker": {
+      "command": "docker",
+      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"],
+      "env": {
+        "JIRA_BASE_URL": "https://YOURWORKSPACE.atlassian.net",
+        "JIRA_EMAIL": "${JIRA_EMAIL}",
+        "JIRA_API_TOKEN": "${JIRA_API_TOKEN}",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+Then test with Claude Code:
+1. Ask Claude to use the `get_issue` tool
+2. Provide a test issue key (e.g., "PROJ-19670")
+3. Verify the response includes all expected fields
+
+**Step 6: Stop the container**
+
+```bash
+# Using docker-compose
+docker-compose down
+
+# Or using Docker CLI
+docker stop pix-jira-mcp
+docker rm pix-jira-mcp
+```
+
+**Advantages of Docker testing:**
+- ✓ Isolated environment (no Node.js conflicts)
+- ✓ Production-like setup
+- ✓ Easy to restart/rebuild
+- ✓ Can run multiple versions simultaneously
+- ✓ Matches deployment environment
 
 ## Verifying Custom Fields
 

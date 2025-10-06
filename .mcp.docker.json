@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcp-schema/main/schema.json",
+  "mcpServers": {
+    "pix-jira-docker": {
+      "command": "docker",
+      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"],
+      "env": {
+        "JIRA_BASE_URL": "https://YOURWORKSPACE.atlassian.net",
+        "JIRA_EMAIL": "${JIRA_EMAIL}",
+        "JIRA_API_TOKEN": "${JIRA_API_TOKEN}",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
