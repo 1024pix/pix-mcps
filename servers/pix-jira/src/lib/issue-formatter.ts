@@ -2,6 +2,13 @@ import type { JiraIssue, JiraIssueFields } from '../types/jira';
 
 const RECENT_COMMENTS_LIMIT = 3;
 
+const PIX_CUSTOM_FIELDS = {
+  EQUIPIX: 'customfield_10253',
+  APPLI_PIX: 'customfield_10117',
+  DEVELOPMENT: 'customfield_10000',
+  RESOLUTION_SEMESTER: 'customfield_10257',
+} as const;
+
 /**
  * Formats a JIRA issue into a human-readable text representation
  */
@@ -224,37 +231,76 @@ function extractTextFromADF(adf: any): string {
 
 /**
  * Extracts Pix-specific custom fields from JIRA issue
- * Note: Custom field IDs need to be configured based on actual Pix JIRA setup
  */
 function extractCustomFields(fields: any): Record<string, string> {
   const customFields: Record<string, string> = {};
 
-  Object.keys(fields).forEach((fieldKey) => {
-    if (!isCustomField(fieldKey)) {
-      return;
+  if (fields[PIX_CUSTOM_FIELDS.EQUIPIX]) {
+    const equipix = extractArrayFieldValue(fields[PIX_CUSTOM_FIELDS.EQUIPIX]);
+    if (equipix) {
+      customFields['Equipe Pix'] = equipix;
     }
+  }
 
-    const fieldValue = fields[fieldKey];
-    if (!fieldValue) {
-      return;
+  if (fields[PIX_CUSTOM_FIELDS.APPLI_PIX]) {
+    const appliPix = extractCustomFieldValue(fields[PIX_CUSTOM_FIELDS.APPLI_PIX]);
+    if (appliPix) {
+      customFields['Appli Pix'] = appliPix;
     }
+  }
 
-    const extractedValue = extractCustomFieldValue(fieldValue);
-    if (extractedValue) {
-      customFields[fieldKey] = extractedValue;
+  if (fields[PIX_CUSTOM_FIELDS.DEVELOPMENT]) {
+    const development = extractDevelopmentInfo(fields[PIX_CUSTOM_FIELDS.DEVELOPMENT]);
+    if (development) {
+      customFields['Development'] = development;
     }
-  });
+  }
+
+  if (fields[PIX_CUSTOM_FIELDS.RESOLUTION_SEMESTER]) {
+    const semester = extractCustomFieldValue(fields[PIX_CUSTOM_FIELDS.RESOLUTION_SEMESTER]);
+    if (semester) {
+      customFields['Resolution Semester'] = semester;
+    }
+  }
 
   return customFields;
 }
 
-function isCustomField(fieldKey: string): boolean {
-  return fieldKey.startsWith('customfield_');
+function extractDevelopmentInfo(devData: unknown): string | null {
+  if (typeof devData !== 'string') {
+    return null;
+  }
+
+  try {
+    const match = devData.match(/repository=\{count=(\d+)/);
+    if (match) {
+      const repoCount = match[1];
+      return `${repoCount} repository/repositories linked`;
+    }
+
+    const jsonMatch = devData.match(/json=(\{.*\})/);
+    if (jsonMatch) {
+      const json = JSON.parse(jsonMatch[1]);
+      const repoData = json.cachedValue?.summary?.repository?.overall;
+      if (repoData) {
+        return `${repoData.count} repository/repositories, last updated ${new Date(repoData.lastUpdated).toLocaleDateString()}`;
+      }
+    }
+  } catch {
+    return 'Development info available (view in JIRA)';
+  }
+
+  return null;
 }
 
 function extractCustomFieldValue(value: unknown): string | null {
-  if (typeof value === 'object' && value !== null && 'name' in value) {
-    return (value as { name: string }).name;
+  if (typeof value === 'object' && value !== null) {
+    if ('value' in value) {
+      return (value as { value: string }).value;
+    }
+    if ('name' in value) {
+      return (value as { name: string }).name;
+    }
   }
 
   if (typeof value === 'string' || typeof value === 'number') {
@@ -271,10 +317,18 @@ function extractCustomFieldValue(value: unknown): string | null {
 function extractArrayFieldValue(values: unknown[]): string | null {
   const names = values
     .map((item) => {
-      if (typeof item === 'object' && item !== null && 'name' in item) {
-        return (item as { name: string }).name;
+      if (typeof item === 'object' && item !== null) {
+        if ('value' in item) {
+          return (item as { value: string }).value;
+        }
+        if ('name' in item) {
+          return (item as { name: string }).name;
+        }
       }
-      return String(item);
+      if (typeof item === 'string') {
+        return item;
+      }
+      return null;
     })
     .filter(Boolean);
 
