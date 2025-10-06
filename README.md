@@ -258,6 +258,33 @@ describe('MyTool', () => {
 });
 ```
 
+### Manual Testing and Integration Testing
+
+For comprehensive testing guides, including manual testing with real credentials and integration testing:
+
+**📖 [Testing Guide](./docs/testing-guide.md)** - Complete guide for testing MCP servers
+
+Topics covered:
+- Quick test with test scripts
+- Testing with Claude Code integration
+- Manual API testing
+- Verifying custom fields
+- Common issues and troubleshooting
+- Testing checklist
+
+**For developers extending or building MCP servers:**
+
+**📚 [Developer Learnings](./docs/developer-learnings.md)** - Lessons learned and best practices
+
+Topics covered:
+- Architecture decisions and rationale
+- Anthropic SDK patterns and gotchas
+- JIRA API quirks and workarounds
+- Custom field discovery process
+- Code patterns and anti-patterns
+- Performance considerations
+- Future improvements
+
 ## Documentation
 
 ### Available Documentation
