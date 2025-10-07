@@ -712,6 +712,84 @@ class JiraClient {
 }
 ```
 
+### 6. MCP Prompts Implementation
+
+**Discovery:** The Anthropic SDK doesn't yet have native prompt support, but prompts can be implemented as tools that return structured analysis frameworks.
+
+**Pattern:**
+```typescript
+// Prompt logic (src/prompts/analyze-ticket.ts)
+export async function executeAnalyzeTicketPrompt(
+  args: { issueKey: string },
+  jiraClient: JiraClient,
+): Promise<{ content: string; error?: string }> {
+  const issue = await jiraClient.getIssue(issueKey, fields, []);
+  const issueDetails = formatIssueForAnalysis(issue);
+  const promptMessage = createAnalysisPromptMessage(issueDetails);
+  return { content: promptMessage };
+}
+
+// Tool wrapper (src/tools/analyze-ticket.ts)
+export function createAnalyzeTicketTool(jiraClient: JiraClient) {
+  return tool(
+    'analyze_ticket',
+    'Prepares detailed technical analysis of a JIRA ticket',
+    { issueKey: z.string().regex(/^[A-Z]+-\d+$/) },
+    async (args) => {
+      const result = await executeAnalyzeTicketPrompt(args, jiraClient);
+      return result.error ? createErrorResponse(result.error) : createSuccessResponse(result.content);
+    }
+  );
+}
+```
+
+**Key learnings:**
+
+1. **Separation of concerns**
+   - Prompt logic in `src/prompts/` handles data fetching and formatting
+   - Tool wrapper in `src/tools/` handles MCP interface and validation
+   - This makes prompt logic testable independent of MCP
+
+2. **Prompts vs Tools decision framework**
+   - **Tools**: Action-oriented (fetch, create, update, delete)
+   - **Prompts**: Analysis-oriented (assess, evaluate, recommend, synthesize)
+   - If it needs Claude's reasoning, it's a prompt
+   - If it's just data retrieval, it's a tool
+
+3. **Prompt message structure**
+   - Start with clear instructions for Claude
+   - Include specific analysis dimensions (e.g., "Complexity Assessment", "Potential Risks")
+   - Format data cleanly with markdown headings
+   - Provide context (related issues, custom fields, etc.)
+
+4. **Function extraction pattern**
+   - Avoid inline comments by extracting functions
+   - `addBasicInformationSection()` is clearer than `// Add basic info`
+   - Each function should do one thing with a descriptive name
+   - Reduces noise, improves testability
+
+5. **Testing prompts**
+   - Mock the JIRA client, not the real API
+   - Test that prompt content contains expected sections
+   - Test error handling (API failures, missing data)
+   - Verify issue key normalization (lowercase → uppercase)
+
+**Benefits of this pattern:**
+- Prompt logic is fully testable without MCP infrastructure
+- Can reuse same prompt with different tool interfaces
+- Clear separation makes future SDK prompt support easy to adopt
+- Type-safe with full TypeScript support
+
+**Future SDK support:**
+When native prompts are supported:
+```typescript
+createSdkMcpServer({
+  name: 'pix-jira',
+  tools: [...],
+  prompts: [...],  // Will be able to register prompts directly
+});
+```
+
 ## Future Improvements
 
 ### 1. Add More JIRA Tools

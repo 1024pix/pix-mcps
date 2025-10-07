@@ -109,9 +109,12 @@ Add this server to your `.mcp.json` configuration:
 
 Retrieves detailed information about a JIRA issue.
 
+### `analyze_ticket`
+
+Generates a structured technical analysis prompt for a JIRA ticket. This tool fetches the ticket data and provides Claude with a comprehensive framework to assess complexity, identify risks, analyze dependencies, and recommend development approaches.
+
 **Parameters:**
 - `issueKey` (required): JIRA issue key in format `PROJECT-NUMBER` (e.g., `PROJ-1234`)
-- `includeComments` (optional): Whether to include comments (default: `true`)
 
 **Example Usage with Claude:**
 
@@ -122,6 +125,16 @@ Get me the details of issue PROJ-1234
 ```
 Show me PROJ-5678 without comments
 ```
+
+```
+Analyze ticket PROJ-1234
+```
+
+**What it provides:**
+- Complexity assessment (Low/Medium/High)
+- Potential technical risks
+- Dependencies and integration points
+- Recommended development approach
 
 **Response Includes:**
 - Basic information (summary, status, type, priority, project)
@@ -279,6 +292,13 @@ if (fields.customfield_10051) {
 - Reduce the frequency of requests
 - Consider caching results if possible
 
+## Prompts
+
+This server includes MCP prompts that provide structured analysis workflows. See [Prompts Guide](./docs/prompts-guide.md) for details on:
+- What prompts are and how they work
+- How to build your own prompts
+- Best practices and testing
+
 ## Future Enhancements
 
 Potential features for future versions:
@@ -291,6 +311,7 @@ Potential features for future versions:
 - 🔔 **Transitions**: Move issues through workflow states
 - 📊 **Bulk Operations**: Work with multiple issues
 - 🎯 **Saved Filters**: Use pre-defined JQL filters
+- 📝 **More Prompts**: Additional analysis and workflow prompts
 
 ## Contributing
 

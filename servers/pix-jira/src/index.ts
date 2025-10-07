@@ -5,6 +5,7 @@ import { createLogger } from '@pix-mcps/shared';
 import { loadConfig } from './config';
 import { JiraClient } from './lib/jira-client';
 import { createGetIssueTool } from './tools/get-issue';
+import { createAnalyzeTicketTool } from './tools/analyze-ticket';
 
 const logger = createLogger('pix-jira-mcp');
 
@@ -27,7 +28,7 @@ async function startServer(): Promise<void> {
   logger.info(`Configured for JIRA instance: ${config.jiraBaseUrl}`);
 
   const jiraClient = await initializeJiraClient(config);
-  const tools = [createGetIssueTool(jiraClient)];
+  const tools = [createGetIssueTool(jiraClient), createAnalyzeTicketTool(jiraClient)];
 
   logAvailableTools();
   createMcpServer(tools);
@@ -49,9 +50,12 @@ function logAvailableTools(): void {
   logger.info('Pix JIRA MCP Server initialized successfully');
   logger.info('Available tools:');
   logger.info('  - get_issue: Retrieve JIRA issue details');
+  logger.info('  - analyze_ticket: Get technical analysis prompt for a JIRA ticket');
 }
 
-function createMcpServer(tools: ReturnType<typeof createGetIssueTool>[]): void {
+function createMcpServer(
+  tools: Array<ReturnType<typeof createGetIssueTool> | ReturnType<typeof createAnalyzeTicketTool>>,
+): void {
   createSdkMcpServer({
     name: 'pix-jira',
     version: '1.0.0',
