@@ -1,6 +1,6 @@
 # Pix JIRA MCP Server
 
-Model Context Protocol server for interacting with the Pix JIRA instance at https://YOURWORKSPACE.atlassian.net.
+Model Context Protocol server for interacting with JIRA.
 
 ## Overview
 
@@ -134,6 +134,8 @@ cp .env.example .env
 Edit `.env` and set your credentials:
 
 ```env
+# For a JIRA : https://<YOURWORKSPACE>.atlassian.net/browse/<YOUR_PROJECT_ID>-123456
+
 # JIRA Configuration
 JIRA_BASE_URL=https://YOURWORKSPACE.atlassian.net
 JIRA_EMAIL=your.email@xxx.com
@@ -435,7 +437,7 @@ if (fields.customfield_10051) {
 
 - Verify the issue key is correct (e.g., `PROJ-1234`)
 - Check that you have permission to view the issue
-- Ensure the issue exists in the Pix project
+- Ensure the issue exists in your JIRA project
 
 ### Connection Errors
 
@@ -443,7 +445,7 @@ if (fields.customfield_10051) {
 
 **Solutions**:
 
-- Verify `JIRA_BASE_URL` is correct: `https://YOURWORKSPACE.atlassian.net`
+- Verify `JIRA_BASE_URL` is correct (e.g., `https://YOURWORKSPACE.atlassian.net`)
 - Check your network connection
 - Verify you can access JIRA in a browser
 - Check if there are any firewall restrictions
