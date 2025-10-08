@@ -495,6 +495,5 @@ AGPL-3.0
 For issues or questions:
 
 - Check this README and [docs/](./docs/) folder
-- Review [MCP documentation](../../docs/anthropic-sdk-reference.md)
 - Check JIRA API docs: https://developer.atlassian.com/cloud/jira/platform/rest/v3/
 - Consult with the Pix development team

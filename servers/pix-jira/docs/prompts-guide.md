@@ -323,8 +323,6 @@ When this becomes available, prompts could be registered directly without tool w
 ## Resources
 
 - [MCP Specification](https://modelcontextprotocol.io)
-- [Anthropic Agent SDK Docs](https://docs.claude.com/en/api/agent-sdk/overview)
-- [Project SDK Reference](../../../docs/anthropic-sdk-reference.md)
 
 ## Summary
 

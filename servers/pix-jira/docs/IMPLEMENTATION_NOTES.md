@@ -4,7 +4,7 @@
 
 ## Architecture
 
-### MCP SDK (Not Anthropic Agent SDK!)
+### MCP SDK
 
 - Uses `@modelcontextprotocol/sdk` for server implementation
 - Communicates over stdin/stdout using JSON-RPC

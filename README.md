@@ -4,12 +4,12 @@ A monorepo containing Model Context Protocol (MCP) servers to help Pix developer
 
 ## Global Objective
 
-This repository provides a collection of MCP servers that extend Claude's capabilities by connecting to Pix infrastructure, APIs, and services. These servers enable developers to:
+This repository provides a collection of MCP servers that extend IA Agents' capabilities by connecting to Pix infrastructure, APIs, and services. These servers enable developers to:
 
-- **Automate workflows**: Interact with Pix systems directly through Claude
+- **Automate workflows**: Interact with Pix systems directly through IA Agents (example: Claude Code)
 - **Query data**: Access information from Pix instances without leaving the development environment
 - **Streamline operations**: Perform common tasks and operations on Pix systems
-- **Enhance productivity**: Reduce context switching by integrating Pix services into Claude Code
+- **Enhance productivity**: Reduce context switching by integrating Pix services into IA Agents
 
 Each MCP server is built using the [Model Context Protocol SDK](https://modelcontextprotocol.io) and follows Pix coding standards for consistency and maintainability.
 
@@ -31,7 +31,6 @@ pix-mcps/
 ├── packages/            # Shared packages
 │   └── shared/         # Common utilities and types
 ├── docs/               # Documentation
-│   ├── anthropic-sdk-reference.md
 │   └── pix-coding-standards.md
 ├── .nvmrc             # Node.js version specification
 ├── package.json       # Root package.json for monorepo
@@ -43,7 +42,6 @@ pix-mcps/
 - **Node.js**: Managed via `.nvmrc` file (use `nvm use` to set the correct version)
 - **npm**: Comes with Node.js
 - **Git**: For version control
-- **Anthropic API Key**: Required for Claude integration
 
 ## Quick Start
 
@@ -149,18 +147,7 @@ npm run typecheck
 
 ### Environment Variables
 
-All sensitive configuration should be stored in `.env` files:
-
-```env
-# Pix API Configuration
-PIX_API_URL=https://api.pix.fr
-PIX_API_KEY=your_api_key_here
-
-# Server Configuration
-MCP_SERVER_PORT=3000
-LOG_LEVEL=info
-```
-
+All sensitive configuration should be stored in `.env` files and documented in  `.env.example`  files with placeholders.
 **Important**: Never commit `.env` files! Always use `.env.example` for documentation.
 
 ## Using MCP Servers with Claude Code
@@ -247,7 +234,6 @@ For server-specific testing guides, see each server's documentation:
 
 ### Available Documentation
 
-- [Anthropic SDK Reference](./docs/anthropic-sdk-reference.md): General guide to Anthropic's Agent SDK (for reference, not used in MCP servers)
 - [Pix Coding Standards](./docs/pix-coding-standards.md): Coding conventions and best practices
 - [Developer Learnings](./docs/developer-learnings.md): Lessons learned and best practices
 
@@ -316,7 +302,8 @@ npm run typecheck
 
 ## License
 
-[Choose appropriate license - consider AGPL-3.0 like Pix or MIT for broader usage]
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+Ce logiciel et son code source sont distribués sous [licence AGPL](https://www.gnu.org/licenses/why-affero-gpl.fr.html).
 
 ## Support
 
@@ -324,5 +311,4 @@ For questions or issues:
 
 - Check the documentation in `/docs`
 - Review existing MCP server implementations
-- Consult the Anthropic SDK documentation
 - Reach out to the Pix development team
