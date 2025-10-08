@@ -1,6 +1,8 @@
 # Anthropic TypeScript Agent SDK Reference
 
-This document contains essential information about the Anthropic TypeScript Agent SDK and MCP (Model Context Protocol) for building custom MCP servers in this monorepo.
+> **⚠️ Note:** This document is kept for reference purposes only. The MCP servers in this monorepo use the [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) package instead. The Anthropic Agent SDK is designed for building applications that *use* MCP servers, not for building the servers themselves.
+
+This document contains information about the Anthropic TypeScript Agent SDK, which can be useful for understanding MCP concepts and building client applications.
 
 ## Table of Contents
 

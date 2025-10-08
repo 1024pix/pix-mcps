@@ -1,5 +1,5 @@
 import pino from 'pino';
-import type { McpToolResponse, Logger } from './types';
+import type { McpToolResponse, Logger } from './types.js';
 
 /**
  * Creates a successful MCP tool response
@@ -38,21 +38,25 @@ export function createErrorResponse(error: Error | string): McpToolResponse {
 export function createLogger(name: string): Logger {
   const level = process.env.LOG_LEVEL || 'info';
 
-  const logger = pino({
-    name,
-    level,
-    transport:
-      process.env.NODE_ENV !== 'production'
-        ? {
-            target: 'pino-pretty',
-            options: {
-              colorize: true,
-              translateTime: 'HH:MM:ss',
-              ignore: 'pid,hostname',
-            },
-          }
-        : undefined,
-  });
+  const logger = pino(
+    {
+      name,
+      level,
+      transport:
+        process.env.NODE_ENV !== 'production'
+          ? {
+              target: 'pino-pretty',
+              options: {
+                colorize: true,
+                translateTime: 'HH:MM:ss',
+                ignore: 'pid,hostname',
+                destination: 2, // stderr for pino-pretty
+              },
+            }
+          : undefined,
+    },
+    process.stderr, // Write to stderr for MCP compatibility
+  );
 
   return {
     debug: (message: string, ...args: unknown[]) => {

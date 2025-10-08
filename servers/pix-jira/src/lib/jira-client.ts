@@ -1,5 +1,5 @@
-import type { Config } from '../config';
-import type { JiraIssue, JiraApiError } from '../types/jira';
+import type { Config } from '../config.js';
+import type { JiraIssue, JiraApiError } from '../types/jira.js';
 import { createLogger } from '@pix-mcps/shared';
 
 const logger = createLogger('jira-client');

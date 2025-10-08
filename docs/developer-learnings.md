@@ -194,39 +194,50 @@ config({ path: resolve(__dirname, '.env') });
 
 **Gotcha:** `__dirname` is not available in ESM modules, must reconstruct it!
 
-## Anthropic SDK Specifics
+## MCP SDK Specifics
 
 ### SDK Installation
 
-**Gotcha:** Package version was tricky to find in early 2025.
+**Note:** MCP servers use the official MCP SDK, not the Anthropic Agent SDK.
 
-**Solution:**
+**Installation:**
 ```bash
-npm install @anthropic-ai/claude-agent-sdk@latest
+npm install @modelcontextprotocol/sdk
 ```
 
-**Discovery:** Use `latest` tag when specific version isn't available yet.
-
-### Tool Function Signature
+### Server Setup Pattern
 
 **Pattern discovered:**
 ```typescript
-import { tool } from '@anthropic-ai/claude-agent-sdk';
-import { z } from 'zod';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 
-const myTool = tool(
-  toolName: string,
-  description: string,
-  schema: { [key: string]: ZodType },
-  handler: async (args: InferredType) => McpResponse
+const server = new Server(
+  { name: 'my-server', version: '1.0.0' },
+  { capabilities: { tools: {} } }
 );
+
+// Register tool listing
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  return { tools: [...] };
+});
+
+// Register tool execution
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  // Handle tool call
+});
+
+// Connect stdio transport
+const transport = new StdioServerTransport();
+await server.connect(transport);
 ```
 
 **Key points:**
-- Description is important! Claude uses it to decide when to use the tool
-- Schema keys become argument names
-- Handler args are fully typed from schema
-- Must return `{ content: [...] }` structure
+- Server communicates over stdin/stdout using JSON-RPC
+- Must implement both ListToolsRequestSchema and CallToolRequestSchema handlers
+- Tools return `{ content: [{ type: 'text', text: '...' }] }` format
+- Logger must write to stderr to avoid interfering with stdout protocol
 
 ### Server Configuration
 

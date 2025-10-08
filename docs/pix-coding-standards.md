@@ -383,7 +383,8 @@ Standard scripts for each MCP server:
 ```json
 {
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "^x.x.x",
+    "@modelcontextprotocol/sdk": "^1.x.x",
+    "@pix-mcps/shared": "*",
     "dotenv": "^x.x.x",
     "zod": "^x.x.x"
   },

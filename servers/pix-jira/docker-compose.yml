@@ -1,0 +1,15 @@
+services:
+  pix-jira:
+    build:
+      context: ../..
+      dockerfile: servers/pix-jira/Dockerfile
+    image: pix-mcp/jira:latest
+    container_name: pix-jira-mcp
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    restart: unless-stopped

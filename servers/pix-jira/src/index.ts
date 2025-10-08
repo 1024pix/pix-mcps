@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
-import { createSdkMcpServer } from '@anthropic-ai/claude-agent-sdk';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { createLogger } from '@pix-mcps/shared';
-import { loadConfig } from './config';
-import { JiraClient } from './lib/jira-client';
-import { createGetIssueTool } from './tools/get-issue';
-import { createAnalyzeTicketTool } from './tools/analyze-ticket';
+import { loadConfig } from './config.js';
+import { JiraClient } from './lib/jira-client.js';
+import { createGetIssueTool } from './tools/get-issue.js';
+import { createAnalyzeTicketTool } from './tools/analyze-ticket.js';
 
 const logger = createLogger('pix-jira-mcp');
 
@@ -31,7 +33,41 @@ async function startServer(): Promise<void> {
   const tools = [createGetIssueTool(jiraClient), createAnalyzeTicketTool(jiraClient)];
 
   logAvailableTools();
-  createMcpServer(tools);
+
+  const server = new Server(
+    {
+      name: 'pix-jira',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  );
+
+  // Register list_tools handler
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return {
+      tools: tools.map(tool => ({
+        name: tool.name,
+        description: tool.description,
+        inputSchema: tool.schema,
+      })),
+    };
+  });
+
+  // Register call_tool handler
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const tool = tools.find(t => t.name === request.params.name);
+    if (!tool) {
+      throw new Error(`Unknown tool: ${request.params.name}`);
+    }
+    return await tool.handler(request.params.arguments);
+  });
+
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
 
   logger.info('Server started and ready to receive requests');
 }
@@ -53,15 +89,6 @@ function logAvailableTools(): void {
   logger.info('  - analyze_ticket: Get technical analysis prompt for a JIRA ticket');
 }
 
-function createMcpServer(
-  tools: Array<ReturnType<typeof createGetIssueTool> | ReturnType<typeof createAnalyzeTicketTool>>,
-): void {
-  createSdkMcpServer({
-    name: 'pix-jira',
-    version: '1.0.0',
-    tools,
-  });
-}
 
 function handleStartupError(error: unknown): void {
   logger.error('Failed to start Pix JIRA MCP Server', error);

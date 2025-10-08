@@ -17,11 +17,96 @@ This MCP server enables Claude to retrieve and interact with JIRA issues from th
 
 ## Prerequisites
 
-- Node.js 20.x (specified in root `.nvmrc`)
+- **For Docker Setup (Recommended)**: Docker installed on your machine
+- **For Development Setup**: Node.js 20.x (specified in root `.nvmrc`)
 - JIRA account with access to Pix JIRA instance
 - JIRA API token ([Generate here](https://id.atlassian.com/manage-profile/security/api-tokens))
 
-## Installation
+## Quick Start with Docker (Recommended)
+
+**The easiest way to run this MCP server - automatically starts on machine boot!**
+
+### 1. Setup Environment
+
+```bash
+cd servers/pix-jira
+cp .env.example .env
+# Edit .env with your JIRA credentials (see Configuration section below)
+```
+
+### 2. Build and Start Container
+
+```bash
+# Build and start the container
+docker compose up -d --build
+
+# Verify it's running
+docker ps | grep pix-jira-mcp
+```
+
+### 3. Configure Claude Code
+
+Add to your `~/.config/claude/mcp.json` (or project `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "pix-jira": {
+      "command": "docker",
+      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"]
+    }
+  }
+}
+```
+
+### 4. Auto-start on Boot
+
+Add this function to your `~/.zshrc` or `~/.bashrc`:
+
+```bash
+# Function to start Pix JIRA MCP container
+pix_jira_mcp_start() {
+  if command -v docker &> /dev/null; then
+    if ! docker ps | grep -q pix-jira-mcp; then
+      docker start pix-jira-mcp 2>/dev/null || \
+      (cd ~/path/to/pix-mcps/servers/pix-jira && docker compose up -d 2>/dev/null)
+    fi
+  fi
+}
+
+# Auto-start on shell initialization
+pix_jira_mcp_start
+```
+
+**Note**: Replace `~/path/to/pix-mcps` with the actual path to this repository.
+
+You can now also call `pix_jira_mcp_start` manually, or use it in other functions like:
+
+```bash
+# Example: Combined Pix boot function
+pixboot() {
+  pix_jira_mcp_start
+  # Add other Pix MCP servers here
+}
+```
+
+### Docker Management
+
+```bash
+# View logs
+docker compose logs -f
+
+# Stop container
+docker compose down
+
+# Restart container
+docker compose restart
+
+# Rebuild after code changes
+docker compose up -d --build
+```
+
+## Installation (Development Setup)
 
 From the monorepo root:
 
@@ -222,6 +307,76 @@ npm run lint --workspace=servers/pix-jira
 npm run lint:fix --workspace=servers/pix-jira
 ```
 
+## Docker Support
+
+This server can run as a Docker container for easy deployment and isolation.
+
+### Building and Running with Docker Compose
+
+```bash
+# From servers/pix-jira directory
+cd servers/pix-jira
+
+# Build and start
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop
+docker compose down
+```
+
+### Building with Docker CLI
+
+```bash
+# From monorepo root
+docker build -f servers/pix-jira/Dockerfile -t pix-mcp/jira:latest .
+
+# Run
+docker run -d \
+  --name pix-jira-mcp \
+  --env-file servers/pix-jira/.env \
+  -i -t \
+  pix-mcp/jira:latest
+```
+
+### Connecting Claude to Docker Container
+
+**Important:** The container runs `sleep infinity` to stay alive. Claude Code starts the MCP server on-demand using `docker exec`.
+
+Update your `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "pix-jira": {
+      "command": "docker",
+      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"]
+    }
+  }
+}
+```
+
+**How it works:**
+1. Container stays alive with `sleep infinity`
+2. When Claude Code needs MCP tools, it runs: `docker exec -i pix-jira-mcp node dist/index.js`
+3. Server starts, connects to JIRA, and serves the request
+4. When Claude disconnects, server shuts down gracefully
+5. Container remains running for next connection
+
+**Verify container is running:**
+```bash
+docker ps | grep pix-jira-mcp
+# Should show: pix-jira-mcp ... Up ...
+```
+
+## Testing
+
+For comprehensive testing guides including manual testing, integration testing with Claude Code, and Docker testing:
+
+**📖 [Testing Guide](./docs/testing-guide.md)** - Complete testing guide for this MCP server
+
 ## Identifying Custom Field IDs
 
 To find the actual custom field IDs in your JIRA instance:
@@ -324,7 +479,7 @@ AGPL-3.0
 ## Support
 
 For issues or questions:
-- Check this README
+- Check this README and [docs/](./docs/) folder
 - Review [MCP documentation](../../docs/anthropic-sdk-reference.md)
 - Check JIRA API docs: https://developer.atlassian.com/cloud/jira/platform/rest/v3/
 - Consult with the Pix development team

@@ -313,7 +313,7 @@ Run the MCP server in a Docker container for isolated testing.
 
 ```bash
 # From the monorepo root
-docker-compose build pix-jira
+docker compose build pix-jira
 
 # Or using Docker CLI directly
 docker build -t pix-mcp/jira:latest .
@@ -322,8 +322,8 @@ docker build -t pix-mcp/jira:latest .
 **Step 2: Start the container**
 
 ```bash
-# Using docker-compose (recommended)
-docker-compose up -d pix-jira
+# Using docker compose (recommended)
+docker compose up -d pix-jira
 
 # Or using Docker CLI
 docker run -d \
@@ -337,12 +337,12 @@ docker run -d \
 
 ```bash
 # Check container status
-docker-compose ps
+docker compose ps
 # or
 docker ps | grep pix-jira
 
 # View container logs
-docker-compose logs -f pix-jira
+docker compose logs -f pix-jira
 # or
 docker logs -f pix-jira-mcp
 ```
@@ -372,24 +372,29 @@ client.getIssue('PROJ-19670').then(issue => {
 
 **Step 5: Connect Claude to the container**
 
+**Important:** The container runs `sleep infinity` to stay alive. Claude Code starts the MCP server on-demand using `docker exec`.
+
 Update your `.mcp.json` to use the Docker container:
 
 ```json
 {
   "mcpServers": {
-    "pix-jira-docker": {
+    "pix-jira": {
       "command": "docker",
-      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"],
-      "env": {
-        "JIRA_BASE_URL": "https://YOURWORKSPACE.atlassian.net",
-        "JIRA_EMAIL": "${JIRA_EMAIL}",
-        "JIRA_API_TOKEN": "${JIRA_API_TOKEN}",
-        "LOG_LEVEL": "info"
-      }
+      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"]
     }
   }
 }
 ```
+
+**Note:** Environment variables are already set in the container via the `.env` file. You don't need to pass them again in `.mcp.json`.
+
+**How it works:**
+1. Container stays alive with `sleep infinity`
+2. When Claude Code needs MCP tools, it runs: `docker exec -i pix-jira-mcp node dist/index.js`
+3. Server starts, connects to JIRA (using env vars from container's `.env`), and serves the request
+4. When Claude disconnects, server shuts down gracefully
+5. Container remains running for next connection
 
 Then test with Claude Code:
 1. Ask Claude to use the `get_issue` tool
@@ -399,8 +404,8 @@ Then test with Claude Code:
 **Step 6: Stop the container**
 
 ```bash
-# Using docker-compose
-docker-compose down
+# Using docker compose
+docker compose down
 
 # Or using Docker CLI
 docker stop pix-jira-mcp

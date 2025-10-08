@@ -31,6 +31,8 @@
   "license": "AGPL-3.0",
   "devDependencies": {
     "@types/node": "^20.17.6",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
     "eslint": "^9.15.0",
     "prettier": "^3.3.3",
     "typescript": "^5.7.2"

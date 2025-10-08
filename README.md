@@ -11,7 +11,7 @@ This repository provides a collection of MCP servers that extend Claude's capabi
 - **Streamline operations**: Perform common tasks and operations on Pix systems
 - **Enhance productivity**: Reduce context switching by integrating Pix services into Claude Code
 
-Each MCP server is built using the [Anthropic TypeScript Agent SDK](https://docs.claude.com/en/api/agent-sdk/typescript) and follows Pix coding standards for consistency and maintainability.
+Each MCP server is built using the [Model Context Protocol SDK](https://modelcontextprotocol.io) and follows Pix coding standards for consistency and maintainability.
 
 ## Architecture
 
@@ -161,125 +161,46 @@ LOG_LEVEL=info
 
 **Important**: Never commit `.env` files! Always use `.env.example` for documentation.
 
-## Using MCP Servers with Claude
+## Using MCP Servers with Claude Code
 
 ### Configuration File
 
-Create or update `.mcp.json` in your project root:
+Create or update `.mcp.json` in your project root to connect MCP servers to Claude Code:
 
 ```json
 {
   "mcpServers": {
-    "pix-api": {
+    "pix-jira": {
       "command": "npx",
-      "args": ["-w", "servers/pix-api", "tsx", "src/index.ts"],
-      "env": {
-        "PIX_API_URL": "https://api.pix.fr",
-        "PIX_API_KEY": "${PIX_API_KEY}"
-      }
-    }
-  }
-}
-```
-
-### Using in Code
-
-```typescript
-import { query } from "@anthropic-ai/claude-agent-sdk";
-
-for await (const message of query({
-  prompt: "Get user information for user ID 123",
-  options: {
-    mcpServers: {
-      "pix-api": {
-        command: "npx",
-        args: ["-w", "servers/pix-api", "tsx", "src/index.ts"]
-      }
-    },
-    allowedTools: ["mcp__pix-api__get_user"]
-  }
-})) {
-  console.log(message);
-}
-```
-
-## Docker Support
-
-MCP servers can run as Docker containers for easy deployment and isolation. This allows developers to:
-- Run MCP servers in isolated environments
-- Avoid Node.js version conflicts
-- Deploy to production with consistent environments
-- Run multiple MCP servers simultaneously
-
-### Building and Running with Docker Compose
-
-The easiest way to run MCP servers with Docker:
-
-```bash
-# Build the container
-docker-compose build pix-jira
-
-# Start the container in background
-docker-compose up -d pix-jira
-
-# Check the container is running
-docker-compose ps
-
-# View logs
-docker-compose logs -f pix-jira
-
-# Stop the container
-docker-compose down
-```
-
-### Building and Running with Docker CLI
-
-For more control, use Docker commands directly:
-
-```bash
-# Build the image
-docker build -t pix-mcp/jira:latest .
-
-# Run the container
-docker run -d \
-  --name pix-jira-mcp \
-  --env-file .env \
-  -i -t \
-  pix-mcp/jira:latest
-
-# Check container status
-docker ps
-
-# View logs
-docker logs -f pix-jira-mcp
-
-# Stop the container
-docker stop pix-jira-mcp
-docker rm pix-jira-mcp
-```
-
-### Connecting Claude to Docker Container
-
-Once the container is running, update your MCP configuration to use the containerized server. Copy `.mcp.docker.json` to `.mcp.json` or merge the configuration:
-
-```json
-{
-  "mcpServers": {
-    "pix-jira-docker": {
-      "command": "docker",
-      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"],
+      "args": ["-w", "servers/pix-jira", "tsx", "src/index.ts"],
       "env": {
         "JIRA_BASE_URL": "https://YOURWORKSPACE.atlassian.net",
         "JIRA_EMAIL": "${JIRA_EMAIL}",
-        "JIRA_API_TOKEN": "${JIRA_API_TOKEN}",
-        "LOG_LEVEL": "info"
+        "JIRA_API_TOKEN": "${JIRA_API_TOKEN}"
       }
     }
   }
 }
 ```
 
-**Note**: The container must be running before Claude can connect to it. Environment variables can be passed through the MCP config or set in the container's `.env` file.
+Once configured, Claude Code will automatically load the MCP server and make its tools available in your conversations.
+
+### Docker Configuration (Alternative)
+
+For production use or easier deployment, you can use Docker:
+
+```json
+{
+  "mcpServers": {
+    "pix-jira": {
+      "command": "docker",
+      "args": ["exec", "-i", "pix-jira-mcp", "node", "dist/index.js"]
+    }
+  }
+}
+```
+
+See each server's documentation for detailed Docker setup instructions.
 
 ## Testing
 
@@ -314,37 +235,18 @@ describe('MyTool', () => {
 
 ### Manual Testing and Integration Testing
 
-For comprehensive testing guides, including manual testing with real credentials and integration testing:
+**📚 [Developer Learnings](./docs/developer-learnings.md)** - Lessons learned and best practices for building MCP servers
 
-**📖 [Testing Guide](./docs/testing-guide.md)** - Complete guide for testing MCP servers
-
-Topics covered:
-- Quick test with test scripts
-- Testing with Claude Code integration
-- Manual API testing
-- Verifying custom fields
-- Common issues and troubleshooting
-- Testing checklist
-
-**For developers extending or building MCP servers:**
-
-**📚 [Developer Learnings](./docs/developer-learnings.md)** - Lessons learned and best practices
-
-Topics covered:
-- Architecture decisions and rationale
-- Anthropic SDK patterns and gotchas
-- JIRA API quirks and workarounds
-- Custom field discovery process
-- Code patterns and anti-patterns
-- Performance considerations
-- Future improvements
+For server-specific testing guides, see each server's documentation:
+- [Pix JIRA Testing Guide](./servers/pix-jira/docs/testing-guide.md)
 
 ## Documentation
 
 ### Available Documentation
 
-- [Anthropic SDK Reference](./docs/anthropic-sdk-reference.md): Complete guide to the Anthropic TypeScript SDK and MCP
+- [Anthropic SDK Reference](./docs/anthropic-sdk-reference.md): General guide to Anthropic's Agent SDK (for reference, not used in MCP servers)
 - [Pix Coding Standards](./docs/pix-coding-standards.md): Coding conventions and best practices
+- [Developer Learnings](./docs/developer-learnings.md): Lessons learned and best practices
 
 ### Adding Documentation
 
@@ -400,9 +302,9 @@ npm run typecheck
 
 ## Resources
 
-- [Anthropic TypeScript SDK Documentation](https://docs.claude.com/en/api/agent-sdk/typescript)
-- [Model Context Protocol](https://docs.claude.com/fr/docs/claude-code/mcp)
-- [Custom Tools Guide](https://docs.claude.com/en/api/agent-sdk/custom-tools)
+- [Model Context Protocol Specification](https://modelcontextprotocol.io)
+- [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+- [Claude Code MCP Documentation](https://docs.claude.com/docs/claude-code/mcp)
 - [Pix GitHub Repository](https://github.com/1024pix/pix)
 
 ## License

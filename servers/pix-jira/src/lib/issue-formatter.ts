@@ -1,4 +1,4 @@
-import type { JiraIssue, JiraIssueFields } from '../types/jira';
+import type { JiraIssue, JiraIssueFields } from '../types/jira.js';
 
 const RECENT_COMMENTS_LIMIT = 3;
 
@@ -28,7 +28,7 @@ export function formatIssue(issue: JiraIssue): string {
     formatIssueLink(issue),
   ];
 
-  return sections.filter(Boolean).join('\n');
+  return sections.filter(Boolean).join('\n---\n\n');
 }
 
 function formatIssueHeader(issue: JiraIssue): string {
@@ -38,6 +38,7 @@ function formatIssueHeader(issue: JiraIssue): string {
 function formatBasicInformation(fields: JiraIssueFields): string {
   const lines = [
     '## Basic Information',
+    '',
     `- **Status**: ${fields.status.name} (${fields.status.statusCategory.name})`,
     `- **Type**: ${fields.issuetype.name}`,
     `- **Priority**: ${fields.priority.name}`,
@@ -51,6 +52,7 @@ function formatPeopleSection(fields: JiraIssueFields): string {
   const assigneeName = fields.assignee ? fields.assignee.displayName : 'Unassigned';
   const lines = [
     '## People',
+    '',
     `- **Assignee**: ${assigneeName}`,
     `- **Reporter**: ${fields.reporter.displayName}`,
     '',
@@ -65,6 +67,7 @@ function formatParentIssueSection(fields: JiraIssueFields): string {
 
   const lines = [
     '## Parent Issue',
+    '',
     `- **${fields.parent.key}**: ${fields.parent.fields.summary}`,
     `- **Type**: ${fields.parent.fields.issuetype.name}`,
     '',
@@ -79,6 +82,7 @@ function formatDescriptionSection(fields: JiraIssueFields): string {
 
   const lines = [
     '## Description',
+    '',
     formatDescription(fields.description),
     '',
   ];
@@ -91,7 +95,7 @@ function formatLabelsSection(fields: JiraIssueFields): string {
   }
 
   const labelsList = fields.labels.map((label) => `- ${label}`).join('\n');
-  return `## Labels\n${labelsList}\n`;
+  return `## Labels\n\n${labelsList}\n`;
 }
 
 function formatFixVersionsSection(fields: JiraIssueFields): string {
@@ -99,7 +103,7 @@ function formatFixVersionsSection(fields: JiraIssueFields): string {
     return '';
   }
 
-  const lines = ['## Fix Versions'];
+  const lines = ['## Fix Versions', ''];
   fields.fixVersions.forEach((version) => {
     const releaseStatus = version.released ? '✓ Released' : '○ Unreleased';
     const releaseDate = version.releaseDate ? ` (${version.releaseDate})` : '';
@@ -115,7 +119,7 @@ function formatRelatedIssuesSection(fields: JiraIssueFields): string {
     return '';
   }
 
-  const lines = ['## Related Issues'];
+  const lines = ['## Related Issues', ''];
   fields.issuelinks.forEach((link) => {
     if (link.outwardIssue) {
       lines.push(`- **${link.type.outward}**: ${link.outwardIssue.key} - ${link.outwardIssue.fields.summary}`);
@@ -136,7 +140,7 @@ function formatCustomFieldsSection(fields: JiraIssueFields): string {
     return '';
   }
 
-  const lines = ['## Pix Custom Fields'];
+  const lines = ['## Pix Custom Fields', ''];
   Object.entries(customFields).forEach(([key, value]) => {
     if (value) {
       lines.push(`- **${key}**: ${value}`);
@@ -154,11 +158,12 @@ function formatCommentsSection(fields: JiraIssueFields): string {
 
   const lines = [
     '## Comments',
+    '',
     `Total comments: ${fields.comment.total}`,
   ];
 
   if (fields.comment.comments && fields.comment.comments.length > 0) {
-    lines.push('', '### Recent Comments:');
+    lines.push('', '### Recent Comments:', '');
     const recentComments = fields.comment.comments.slice(-RECENT_COMMENTS_LIMIT);
 
     recentComments.forEach((comment) => {
@@ -176,6 +181,7 @@ function formatCommentsSection(fields: JiraIssueFields): string {
 function formatTimelineSection(fields: JiraIssueFields): string {
   const lines = [
     '## Timeline',
+    '',
     `- **Created**: ${new Date(fields.created).toLocaleString()}`,
     `- **Updated**: ${new Date(fields.updated).toLocaleString()}`,
     '',
@@ -185,7 +191,7 @@ function formatTimelineSection(fields: JiraIssueFields): string {
 
 function formatIssueLink(issue: JiraIssue): string {
   const browseUrl = issue.self.replace('/rest/api/3/issue/', '/browse/');
-  return `---\n**View in JIRA**: ${browseUrl}`;
+  return `**View in JIRA**: ${browseUrl}`;
 }
 
 /**

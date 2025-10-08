@@ -1,9 +1,7 @@
-import { tool } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
-import type { JiraClient } from '../lib/jira-client';
-import { JiraApiException } from '../lib/jira-client';
-import { formatIssue } from '../lib/issue-formatter';
-import { createSuccessResponse, createErrorResponse } from '@pix-mcps/shared';
+import type { JiraClient } from '../lib/jira-client.js';
+import { JiraApiException } from '../lib/jira-client.js';
+import { formatIssue } from '../lib/issue-formatter.js';
 import { createLogger } from '@pix-mcps/shared';
 
 const logger = createLogger('get-issue-tool');
@@ -26,41 +24,65 @@ const STANDARD_ISSUE_FIELDS = [
   'customfield_*',
 ];
 
+const issueKeySchema = z
+  .string()
+  .regex(/^[A-Z]+-\d+$/, 'Issue key must be in format: PROJECT-NUMBER (e.g., PROJ-1234)')
+  .describe('The JIRA issue key in format PROJECT-NUMBER (e.g., PROJ-1234, PROJ-5678)');
+
+const includeCommentsSchema = z
+  .boolean()
+  .optional()
+  .default(true)
+  .describe('Whether to include comments in the response (default: true)');
+
+const getIssueArgsSchema = z.object({
+  issueKey: issueKeySchema,
+  includeComments: includeCommentsSchema,
+});
+
 /**
  * Creates the get_issue tool for retrieving JIRA issue details
  */
 export function createGetIssueTool(jiraClient: JiraClient) {
-  return tool(
-    'get_issue',
-    'Retrieves detailed information about a JIRA issue by its key (e.g., PROJ-1234). Returns comprehensive details including summary, description, status, assignee, priority, labels, fix versions, parent issue/epic, related issues, custom Pix fields (equipix, appli pix), development info (branches, PRs), and recent comments.',
-    {
-      issueKey: z
-        .string()
-        .regex(/^[A-Z]+-\d+$/, 'Issue key must be in format: PROJECT-NUMBER (e.g., PROJ-1234)')
-        .describe('The JIRA issue key in format PROJECT-NUMBER (e.g., PROJ-1234, PROJ-5678)'),
-      includeComments: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe('Whether to include comments in the response (default: true)'),
+  return {
+    name: 'get_issue',
+    description: 'Retrieves detailed information about a JIRA issue by its key (e.g., PROJ-1234). Returns comprehensive details including summary, description, status, assignee, priority, labels, fix versions, parent issue/epic, related issues, custom Pix fields (equipix, appli pix), development info (branches, PRs), and recent comments.',
+    schema: {
+      type: 'object' as const,
+      properties: {
+        issueKey: {
+          type: 'string' as const,
+          pattern: '^[A-Z]+-\\d+$',
+          description: 'The JIRA issue key in format PROJECT-NUMBER (e.g., PROJ-1234, PROJ-5678)',
+        },
+        includeComments: {
+          type: 'boolean' as const,
+          description: 'Whether to include comments in the response (default: true)',
+          default: true,
+        },
+      },
+      required: ['issueKey'],
     },
-    async (args) => {
-      logger.info(`Fetching issue: ${args.issueKey}`);
+    handler: async (args: unknown) => {
+      const validatedArgs = getIssueArgsSchema.parse(args);
+      logger.info(`Fetching issue: ${validatedArgs.issueKey}`);
 
       try {
-        const normalizedIssueKey = normalizeIssueKey(args.issueKey);
-        const { fields, expand } = buildFetchOptions(args.includeComments);
+        const normalizedIssueKey = normalizeIssueKey(validatedArgs.issueKey);
+        const { fields, expand } = buildFetchOptions(validatedArgs.includeComments);
         const issue = await jiraClient.getIssue(normalizedIssueKey, fields, expand);
         const formattedIssue = formatIssue(issue);
 
         logger.info(`Successfully retrieved issue: ${normalizedIssueKey}`);
 
-        return createSuccessResponse(formattedIssue);
+        return {
+          content: [{ type: 'text' as const, text: formattedIssue }],
+        };
       } catch (error) {
         return handleFetchError(error);
       }
     },
-  );
+  };
 }
 
 function normalizeIssueKey(issueKey: string): string {
@@ -79,16 +101,21 @@ function buildFetchOptions(includeComments: boolean): { fields: string[]; expand
   return { fields, expand };
 }
 
-function handleFetchError(error: unknown): ReturnType<typeof createErrorResponse> {
+function handleFetchError(error: unknown) {
   logger.error('Failed to fetch issue', error);
 
+  let errorMessage: string;
+
   if (error instanceof JiraApiException) {
-    return createErrorResponse(error.message);
+    errorMessage = error.message;
+  } else if (error instanceof Error) {
+    errorMessage = `Failed to retrieve issue: ${error.message}`;
+  } else {
+    errorMessage = 'An unexpected error occurred while retrieving the issue.';
   }
 
-  if (error instanceof Error) {
-    return createErrorResponse(`Failed to retrieve issue: ${error.message}`);
-  }
-
-  return createErrorResponse('An unexpected error occurred while retrieving the issue.');
+  return {
+    content: [{ type: 'text' as const, text: `Error: ${errorMessage}` }],
+    isError: true,
+  };
 }

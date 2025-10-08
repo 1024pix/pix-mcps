@@ -1,6 +1,6 @@
-import type { JiraClient } from '../lib/jira-client';
-import { JiraApiException } from '../lib/jira-client';
-import type { JiraIssue } from '../types/jira';
+import type { JiraClient } from '../lib/jira-client.js';
+import { JiraApiException } from '../lib/jira-client.js';
+import type { JiraIssue } from '../types/jira.js';
 import { createLogger } from '@pix-mcps/shared';
 
 const logger = createLogger('analyze-ticket-prompt');
