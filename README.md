@@ -88,6 +88,7 @@ npm run build --workspace=servers/[server-name]
 MCP server for interacting with the Pix JIRA instance.
 
 **Features:**
+
 - Get detailed information about JIRA issues
 - View issue status, assignee, priority, and metadata
 - Access parent issues, epics, and related issues
@@ -95,6 +96,7 @@ MCP server for interacting with the Pix JIRA instance.
 - Support for Pix custom fields (equipix, appli pix)
 
 **Available Tools:**
+
 - `get_issue`: Retrieve comprehensive JIRA issue details
 
 **Documentation:** [servers/pix-jira/README.md](./servers/pix-jira/README.md)
@@ -238,6 +240,7 @@ describe('MyTool', () => {
 **📚 [Developer Learnings](./docs/developer-learnings.md)** - Lessons learned and best practices for building MCP servers
 
 For server-specific testing guides, see each server's documentation:
+
 - [Pix JIRA Testing Guide](./servers/pix-jira/docs/testing-guide.md)
 
 ## Documentation
@@ -282,20 +285,24 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ### Common Issues
 
 **Node.js version mismatch**
+
 ```bash
 nvm use
 ```
 
 **Missing environment variables**
+
 - Check `.env.example` for required variables
 - Ensure `.env` file exists and is properly configured
 
 **Type errors**
+
 ```bash
 npm run typecheck
 ```
 
 **MCP server not starting**
+
 - Check logs for errors
 - Verify environment variables are set
 - Ensure dependencies are installed
@@ -314,6 +321,7 @@ npm run typecheck
 ## Support
 
 For questions or issues:
+
 - Check the documentation in `/docs`
 - Review existing MCP server implementations
 - Consult the Anthropic SDK documentation

@@ -67,11 +67,7 @@ describe('get-issue tool', () => {
       // Note: Zod validation expects uppercase, normalization happens after validation
       await tool.handler({ issueKey: 'PROJ-1234' });
 
-      expect(mockJiraClient.getIssue).toHaveBeenCalledWith(
-        'PROJ-1234',
-        expect.any(Array),
-        expect.any(Array),
-      );
+      expect(mockJiraClient.getIssue).toHaveBeenCalledWith('PROJ-1234', expect.any(Array), expect.any(Array));
     });
 
     it('should trim whitespace from issue key', async () => {
@@ -79,11 +75,7 @@ describe('get-issue tool', () => {
       // Whitespace is trimmed before validation by normalizeIssueKey
       await tool.handler({ issueKey: 'PROJ-1234' });
 
-      expect(mockJiraClient.getIssue).toHaveBeenCalledWith(
-        'PROJ-1234',
-        expect.any(Array),
-        expect.any(Array),
-      );
+      expect(mockJiraClient.getIssue).toHaveBeenCalledWith('PROJ-1234', expect.any(Array), expect.any(Array));
     });
 
     it('should include comments by default', async () => {

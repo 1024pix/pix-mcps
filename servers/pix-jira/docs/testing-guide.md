@@ -44,6 +44,7 @@ LOG_LEVEL=info
 ```
 
 **Getting your API token:**
+
 1. Go to https://id.atlassian.com/manage-profile/security/api-tokens
 2. Click "Create API token"
 3. Give it a name (e.g., "Pix MCP Testing")
@@ -274,15 +275,12 @@ async function testJiraApi() {
   // Test 2: Fetch an issue
   const issueKey = process.argv[2] || 'PROJ-19670';
   console.log(`2. Fetching issue ${issueKey}...`);
-  const issueResponse = await fetch(
-    `${baseUrl}/rest/api/3/issue/${issueKey}`,
-    {
-      headers: {
-        Authorization: `Basic ${base64}`,
-        Accept: 'application/json',
-      },
-    }
-  );
+  const issueResponse = await fetch(`${baseUrl}/rest/api/3/issue/${issueKey}`, {
+    headers: {
+      Authorization: `Basic ${base64}`,
+      Accept: 'application/json',
+    },
+  });
 
   if (issueResponse.ok) {
     const issue = await issueResponse.json();
@@ -390,6 +388,7 @@ Update your `.mcp.json` to use the Docker container:
 **Note:** Environment variables are already set in the container via the `.env` file. You don't need to pass them again in `.mcp.json`.
 
 **How it works:**
+
 1. Container stays alive with `sleep infinity`
 2. When Claude Code needs MCP tools, it runs: `docker exec -i pix-jira-mcp node dist/index.js`
 3. Server starts, connects to JIRA (using env vars from container's `.env`), and serves the request
@@ -397,6 +396,7 @@ Update your `.mcp.json` to use the Docker container:
 5. Container remains running for next connection
 
 Then test with Claude Code:
+
 1. Ask Claude to use the `get_issue` tool
 2. Provide a test issue key (e.g., "PROJ-19670")
 3. Verify the response includes all expected fields
@@ -413,6 +413,7 @@ docker rm pix-jira-mcp
 ```
 
 **Advantages of Docker testing:**
+
 - ✓ Isolated environment (no Node.js conflicts)
 - ✓ Production-like setup
 - ✓ Easy to restart/rebuild
@@ -486,6 +487,7 @@ You should see these fields if the issue has them:
 **Cause:** Missing or invalid environment variables.
 
 **Solution:**
+
 1. Check that `.env` file exists in `servers/pix-jira/`
 2. Verify all required variables are set
 3. Check for typos in variable names
@@ -499,6 +501,7 @@ cat servers/pix-jira/.env
 **Cause:** Invalid email or API token.
 
 **Solution:**
+
 1. Verify your email is correct
 2. Generate a new API token: https://id.atlassian.com/manage-profile/security/api-tokens
 3. Make sure you copied the entire token (no spaces)
@@ -509,6 +512,7 @@ cat servers/pix-jira/.env
 **Cause:** Issue doesn't exist or you don't have permission.
 
 **Solution:**
+
 1. Verify the issue key is correct (e.g., `PROJ-12345`)
 2. Check that you can view the issue in JIRA web interface
 3. Verify you have access to the PIX project
@@ -531,6 +535,7 @@ npm run build --workspace=servers/pix-jira
 **Cause:** Too many API requests.
 
 **Solution:**
+
 1. Wait a few minutes
 2. Reduce the frequency of requests
 3. Check if other processes are using the same API token
@@ -540,6 +545,7 @@ npm run build --workspace=servers/pix-jira
 **Cause:** Field not configured in the formatter.
 
 **Solution:**
+
 1. Use the field inspector to identify the field ID
 2. Add the field mapping in `src/lib/issue-formatter.ts`
 3. See the Developer Learnings doc for details
@@ -581,7 +587,7 @@ Use this checklist to verify everything works:
 - [ ] Appli Pix displays correctly
 - [ ] Development info shows repository count
 - [ ] Resolution Semester appears
-- [ ] All custom fields show friendly names (not customfield_*)
+- [ ] All custom fields show friendly names (not customfield\_\*)
 
 ### Error Handling
 
@@ -639,6 +645,7 @@ done
 ```
 
 Monitor for:
+
 - Response times staying consistent
 - No memory leaks
 - No rate limiting errors

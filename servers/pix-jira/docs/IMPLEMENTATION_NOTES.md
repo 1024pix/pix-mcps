@@ -5,6 +5,7 @@
 ## Architecture
 
 ### MCP SDK (Not Anthropic Agent SDK!)
+
 - Uses `@modelcontextprotocol/sdk` for server implementation
 - Communicates over stdin/stdout using JSON-RPC
 - Logger writes to stderr to avoid interfering with stdout protocol
@@ -12,6 +13,7 @@
 ### Key Components
 
 **Server Entry** (`src/index.ts`):
+
 ```typescript
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -28,18 +30,21 @@ await server.connect(new StdioServerTransport());
 ```
 
 **Tools Structure**:
+
 ```typescript
 export function createMyTool(client: JiraClient) {
   return {
     name: 'tool_name',
     description: 'What the tool does (Claude uses this)',
-    schema: { /* JSON Schema for params */ },
+    schema: {
+      /* JSON Schema for params */
+    },
     handler: async (args: unknown) => {
       // Validate with Zod
       const validated = mySchema.parse(args);
       // Return MCP format
       return { content: [{ type: 'text', text: result }] };
-    }
+    },
   };
 }
 ```
@@ -54,10 +59,12 @@ export function createMyTool(client: JiraClient) {
 Prompts are implemented as tools that return analysis frameworks (not native prompt support yet).
 
 **Structure**:
+
 - `src/prompts/my-prompt.ts` - Core prompt logic
 - `src/tools/my-prompt.ts` - Tool wrapper
 
 **Example**:
+
 ```typescript
 // In prompts/analyze-ticket.ts
 export async function executeAnalyzeTicketPrompt(args, client) {
@@ -75,7 +82,7 @@ export function createAnalyzeTicketTool(client) {
     handler: async (args) => {
       const result = await executeAnalyzeTicketPrompt(args, client);
       return { content: [{ type: 'text', text: result.content }] };
-    }
+    },
   };
 }
 ```
@@ -90,6 +97,7 @@ CMD ["sleep", "infinity"]
 ```
 
 **Claude Code connects via**:
+
 ```json
 {
   "command": "docker",
@@ -98,6 +106,7 @@ CMD ["sleep", "infinity"]
 ```
 
 **Why this works**:
+
 1. Container runs `sleep infinity`
 2. Claude Code runs `docker exec` when needed
 3. Server starts, handles request, exits
@@ -106,16 +115,23 @@ CMD ["sleep", "infinity"]
 ## ESM Modules
 
 **Critical**: Always use `.js` extensions in imports:
+
 ```typescript
-import { config } from './config.js';  // ✅
-import { config } from './config';      // ❌
+import { config } from './config.js'; // ✅
+import { config } from './config'; // ❌
 ```
 
 ## Logger Setup
 
 **Must write to stderr**:
+
 ```typescript
-const logger = pino({ /* config */ }, process.stderr);
+const logger = pino(
+  {
+    /* config */
+  },
+  process.stderr,
+);
 ```
 
 ## Testing
@@ -127,6 +143,7 @@ const logger = pino({ /* config */ }, process.stderr);
 ## Custom Fields
 
 Pix JIRA custom fields (in `lib/issue-formatter.ts`):
+
 - `customfield_10253`: Equipix
 - `customfield_10117`: Appli Pix
 - `customfield_10000`: Development info

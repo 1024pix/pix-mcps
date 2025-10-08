@@ -199,6 +199,7 @@ Retrieves detailed information about a JIRA issue.
 Generates a structured technical analysis prompt for a JIRA ticket. This tool fetches the ticket data and provides Claude with a comprehensive framework to assess complexity, identify risks, analyze dependencies, and recommend development approaches.
 
 **Parameters:**
+
 - `issueKey` (required): JIRA issue key in format `PROJECT-NUMBER` (e.g., `PROJ-1234`)
 
 **Example Usage with Claude:**
@@ -216,12 +217,14 @@ Analyze ticket PROJ-1234
 ```
 
 **What it provides:**
+
 - Complexity assessment (Low/Medium/High)
 - Potential technical risks
 - Dependencies and integration points
 - Recommended development approach
 
 **Response Includes:**
+
 - Basic information (summary, status, type, priority, project)
 - People (assignee, reporter)
 - Parent issue or epic (if applicable)
@@ -359,6 +362,7 @@ Update your `.mcp.json`:
 ```
 
 **How it works:**
+
 1. Container stays alive with `sleep infinity`
 2. When Claude Code needs MCP tools, it runs: `docker exec -i pix-jira-mcp node dist/index.js`
 3. Server starts, connects to JIRA, and serves the request
@@ -366,6 +370,7 @@ Update your `.mcp.json`:
 5. Container remains running for next connection
 
 **Verify container is running:**
+
 ```bash
 docker ps | grep pix-jira-mcp
 # Should show: pix-jira-mcp ... Up ...
@@ -387,6 +392,7 @@ To find the actual custom field IDs in your JIRA instance:
    - Look for `customfield_*` entries
 
 2. **Via API**:
+
    ```bash
    curl -u your.email@xxx.com:your_api_token \
      https://YOURWORKSPACE.atlassian.net/rest/api/3/issue/PROJ-1234
@@ -397,6 +403,7 @@ To find the actual custom field IDs in your JIRA instance:
    - Map field IDs to friendly names in `extractCustomFields()`
 
 Example:
+
 ```typescript
 // In issue-formatter.ts
 if (fields.customfield_10050) {
@@ -414,6 +421,7 @@ if (fields.customfield_10051) {
 **Error**: `Authentication failed. Please check your JIRA email and API token.`
 
 **Solutions**:
+
 - Verify `JIRA_EMAIL` is correct
 - Verify `JIRA_API_TOKEN` is valid and not expired
 - Generate a new API token if needed
@@ -424,6 +432,7 @@ if (fields.customfield_10051) {
 **Error**: `The requested JIRA issue was not found.`
 
 **Solutions**:
+
 - Verify the issue key is correct (e.g., `PROJ-1234`)
 - Check that you have permission to view the issue
 - Ensure the issue exists in the Pix project
@@ -433,6 +442,7 @@ if (fields.customfield_10051) {
 **Error**: `Failed to connect to JIRA. Please check your network connection and JIRA URL.`
 
 **Solutions**:
+
 - Verify `JIRA_BASE_URL` is correct: `https://YOURWORKSPACE.atlassian.net`
 - Check your network connection
 - Verify you can access JIRA in a browser
@@ -443,6 +453,7 @@ if (fields.customfield_10051) {
 **Error**: `Rate limit exceeded. Please try again later.`
 
 **Solutions**:
+
 - Wait a few minutes before making more requests
 - Reduce the frequency of requests
 - Consider caching results if possible
@@ -450,6 +461,7 @@ if (fields.customfield_10051) {
 ## Prompts
 
 This server includes MCP prompts that provide structured analysis workflows. See [Prompts Guide](./docs/prompts-guide.md) for details on:
+
 - What prompts are and how they work
 - How to build your own prompts
 - Best practices and testing
@@ -479,6 +491,7 @@ AGPL-3.0
 ## Support
 
 For issues or questions:
+
 - Check this README and [docs/](./docs/) folder
 - Review [MCP documentation](../../docs/anthropic-sdk-reference.md)
 - Check JIRA API docs: https://developer.atlassian.com/cloud/jira/platform/rest/v3/

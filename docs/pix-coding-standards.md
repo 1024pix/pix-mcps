@@ -56,18 +56,18 @@ Configuration in `eslint.config.mjs` using the new flat config format:
 ```javascript
 export default [
   {
-    ignores: ['**/dist/', '**/node_modules/', '**/coverage/']
+    ignores: ['**/dist/', '**/node_modules/', '**/coverage/'],
   },
   {
     files: ['**/*.js', '**/*.ts'],
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'module'
+      sourceType: 'module',
     },
     rules: {
       // Your rules here
-    }
-  }
+    },
+  },
 ];
 ```
 
@@ -272,9 +272,10 @@ async function fetchData() {
 
 // Avoid
 function fetchData() {
-  return apiClient.get('/data')
-    .then(result => result)
-    .catch(error => {
+  return apiClient
+    .get('/data')
+    .then((result) => result)
+    .catch((error) => {
       logger.error('Failed to fetch data', error);
       throw error;
     });
@@ -299,11 +300,7 @@ export class PixApiError extends Error {
 
 // Usage
 if (response.status !== 200) {
-  throw new PixApiError(
-    'Failed to fetch user',
-    response.status,
-    response.data,
-  );
+  throw new PixApiError('Failed to fetch user', response.status, response.data);
 }
 ```
 
@@ -348,10 +345,12 @@ logger.error('Error occurred', error);
 ```
 
 **Configuration:**
+
 - `LOG_LEVEL`: Set to `debug`, `info`, `warn`, or `error` (default: `info`)
 - `NODE_ENV`: Set to `production` for JSON logging, otherwise pretty print
 
 **Benefits:**
+
 - Fast, low-overhead logging
 - Structured JSON logs in production
 - Pretty colored output in development

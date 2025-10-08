@@ -68,8 +68,7 @@ function addDescriptionSection(sections: string[], fields: any): void {
 
   sections.push('');
   sections.push(`**Description:**`);
-  const description =
-    typeof fields.description === 'string' ? fields.description : '[Complex formatted content]';
+  const description = typeof fields.description === 'string' ? fields.description : '[Complex formatted content]';
   sections.push(description);
 }
 
@@ -77,9 +76,7 @@ function addParentIssueSection(sections: string[], fields: any): void {
   if (!fields.parent) return;
 
   sections.push('');
-  sections.push(
-    `**Parent Issue:** ${fields.parent.key} - ${fields.parent.fields?.summary || ''}`,
-  );
+  sections.push(`**Parent Issue:** ${fields.parent.key} - ${fields.parent.fields?.summary || ''}`);
 }
 
 function addLabelsSection(sections: string[], fields: any): void {
@@ -119,8 +116,7 @@ function addCustomFieldsSection(sections: string[], fields: any): void {
 
 function addJiraLinkSection(sections: string[], issue: JiraIssue): void {
   const browseUrl =
-    issue.self?.replace('/rest/api/3/issue/', '/browse/') ||
-    `https://jira.example.com/browse/${issue.key}`;
+    issue.self?.replace('/rest/api/3/issue/', '/browse/') || `https://jira.example.com/browse/${issue.key}`;
   sections.push('');
   sections.push(`**View in JIRA:** ${browseUrl}`);
 }

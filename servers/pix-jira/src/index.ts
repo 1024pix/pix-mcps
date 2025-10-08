@@ -43,13 +43,13 @@ async function startServer(): Promise<void> {
       capabilities: {
         tools: {},
       },
-    }
+    },
   );
 
   // Register list_tools handler
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
-      tools: tools.map(tool => ({
+      tools: tools.map((tool) => ({
         name: tool.name,
         description: tool.description,
         inputSchema: tool.schema,
@@ -59,7 +59,7 @@ async function startServer(): Promise<void> {
 
   // Register call_tool handler
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    const tool = tools.find(t => t.name === request.params.name);
+    const tool = tools.find((t) => t.name === request.params.name);
     if (!tool) {
       throw new Error(`Unknown tool: ${request.params.name}`);
     }
@@ -88,7 +88,6 @@ function logAvailableTools(): void {
   logger.info('  - get_issue: Retrieve JIRA issue details');
   logger.info('  - analyze_ticket: Get technical analysis prompt for a JIRA ticket');
 }
-
 
 function handleStartupError(error: unknown): void {
   logger.error('Failed to start Pix JIRA MCP Server', error);

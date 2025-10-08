@@ -80,12 +80,7 @@ function formatDescriptionSection(fields: JiraIssueFields): string {
     return '';
   }
 
-  const lines = [
-    '## Description',
-    '',
-    formatDescription(fields.description),
-    '',
-  ];
+  const lines = ['## Description', '', formatDescription(fields.description), ''];
   return lines.join('\n');
 }
 
@@ -156,11 +151,7 @@ function formatCommentsSection(fields: JiraIssueFields): string {
     return '';
   }
 
-  const lines = [
-    '## Comments',
-    '',
-    `Total comments: ${fields.comment.total}`,
-  ];
+  const lines = ['## Comments', '', `Total comments: ${fields.comment.total}`];
 
   if (fields.comment.comments && fields.comment.comments.length > 0) {
     lines.push('', '### Recent Comments:', '');

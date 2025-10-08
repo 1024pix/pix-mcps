@@ -64,7 +64,7 @@ export class JiraClient {
         await this.handleErrorResponse(response);
       }
 
-      return await response.json() as T;
+      return (await response.json()) as T;
     } catch (error) {
       return this.handleRequestError(error);
     }

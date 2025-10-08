@@ -13,12 +13,14 @@ Thank you for your interest in contributing to the Pix MCP Servers monorepo! Thi
 ### Setup
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd pix-mcps
    ```
 
 2. Use the correct Node.js version:
+
    ```bash
    nvm use
    ```
@@ -33,12 +35,14 @@ Thank you for your interest in contributing to the Pix MCP Servers monorepo! Thi
 ### Creating a New MCP Server
 
 1. Create a new directory in `servers/`:
+
    ```bash
    mkdir servers/my-new-server
    cd servers/my-new-server
    ```
 
 2. Initialize the package:
+
    ```bash
    npm init -y
    ```
@@ -68,6 +72,7 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) specific
 - `chore:` Changes to build process or auxiliary tools
 
 Examples:
+
 ```
 feat(pix-api): add user lookup tool
 fix(shared): handle undefined environment variables
@@ -83,6 +88,7 @@ test(pix-api): add integration tests for authentication
 - `refactor/description` - Code refactoring
 
 Examples:
+
 - `feature/pix-api-user-tools`
 - `fix/auth-timeout-handling`
 - `docs/setup-instructions`
@@ -90,6 +96,7 @@ Examples:
 ## Pull Request Process
 
 1. **Create a feature branch** from `main`:
+
    ```bash
    git checkout -b feature/my-feature
    ```
@@ -99,6 +106,7 @@ Examples:
 3. **Write or update tests** for your changes
 
 4. **Run quality checks**:
+
    ```bash
    npm run lint
    npm run typecheck
@@ -108,6 +116,7 @@ Examples:
 5. **Commit your changes** with conventional commit messages
 
 6. **Push to your branch**:
+
    ```bash
    git push origin feature/my-feature
    ```
@@ -182,7 +191,7 @@ describe('MyTool', () => {
 - Document error conditions
 - Provide usage examples
 
-```typescript
+````typescript
 /**
  * Retrieves user information from Pix API
  *
@@ -199,7 +208,7 @@ describe('MyTool', () => {
 async function getUserInfo(userId: string): Promise<UserProfile> {
   // Implementation
 }
-```
+````
 
 ### README Files
 
@@ -232,15 +241,18 @@ Each MCP server must have a README.md with:
 ### Common Issues
 
 **Tests failing locally but not in CI**
+
 - Ensure you're using the correct Node.js version (`nvm use`)
 - Clear node_modules and reinstall
 
 **Type errors**
+
 - Run `npm run typecheck` to see all errors
 - Ensure all dependencies are installed
 - Check tsconfig.json configuration
 
 **Linting errors**
+
 - Run `npm run lint:fix` to auto-fix
 - Check eslint.config.mjs for rules
 

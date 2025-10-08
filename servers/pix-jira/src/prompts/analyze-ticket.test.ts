@@ -37,10 +37,7 @@ describe('analyzeTicketPrompt', () => {
       vi.mocked(mockJiraClient.getIssue).mockResolvedValue(mockIssue);
 
       // Act
-      const result = await executeAnalyzeTicketPrompt(
-        { issueKey: 'PROJ-1234' },
-        mockJiraClient,
-      );
+      const result = await executeAnalyzeTicketPrompt({ issueKey: 'PROJ-1234' }, mockJiraClient);
 
       // Assert
       expect(result.error).toBeUndefined();
@@ -94,11 +91,7 @@ describe('analyzeTicketPrompt', () => {
       await executeAnalyzeTicketPrompt({ issueKey: 'pix-5678' }, mockJiraClient);
 
       // Assert
-      expect(mockJiraClient.getIssue).toHaveBeenCalledWith(
-        'PROJ-5678',
-        expect.any(Array),
-        expect.any(Array),
-      );
+      expect(mockJiraClient.getIssue).toHaveBeenCalledWith('PROJ-5678', expect.any(Array), expect.any(Array));
     });
 
     it('should include labels in the prompt when present', async () => {
@@ -159,10 +152,7 @@ describe('analyzeTicketPrompt', () => {
       vi.mocked(mockJiraClient.getIssue).mockRejectedValue(apiError);
 
       // Act
-      const result = await executeAnalyzeTicketPrompt(
-        { issueKey: 'PROJ-9999' },
-        mockJiraClient,
-      );
+      const result = await executeAnalyzeTicketPrompt({ issueKey: 'PROJ-9999' }, mockJiraClient);
 
       // Assert
       expect(result.error).toBe('Issue not found');
@@ -175,10 +165,7 @@ describe('analyzeTicketPrompt', () => {
       vi.mocked(mockJiraClient.getIssue).mockRejectedValue(genericError);
 
       // Act
-      const result = await executeAnalyzeTicketPrompt(
-        { issueKey: 'PROJ-8888' },
-        mockJiraClient,
-      );
+      const result = await executeAnalyzeTicketPrompt({ issueKey: 'PROJ-8888' }, mockJiraClient);
 
       // Assert
       expect(result.error).toContain('Failed to analyze ticket');
@@ -191,15 +178,10 @@ describe('analyzeTicketPrompt', () => {
       vi.mocked(mockJiraClient.getIssue).mockRejectedValue('Unknown error');
 
       // Act
-      const result = await executeAnalyzeTicketPrompt(
-        { issueKey: 'PROJ-7777' },
-        mockJiraClient,
-      );
+      const result = await executeAnalyzeTicketPrompt({ issueKey: 'PROJ-7777' }, mockJiraClient);
 
       // Assert
-      expect(result.error).toBe(
-        'An unexpected error occurred while preparing ticket analysis.',
-      );
+      expect(result.error).toBe('An unexpected error occurred while preparing ticket analysis.');
       expect(result.content).toBe('');
     });
 

@@ -15,6 +15,7 @@ Think of prompts as "smart templates" that combine data retrieval with structure
 ## Why Use Prompts?
 
 Prompts are useful when you want to:
+
 - Provide structured analysis of data
 - Create consistent workflows
 - Combine multiple pieces of information into a coherent request
@@ -23,12 +24,14 @@ Prompts are useful when you want to:
 ### Example: analyze-ticket Prompt
 
 Instead of manually:
+
 1. Fetching a JIRA ticket
 2. Reading all the details
 3. Asking Claude to analyze it
 4. Specifying what aspects to analyze
 
 You can simply invoke the `analyze_ticket` tool, which:
+
 1. Fetches the ticket data
 2. Formats it clearly
 3. Provides Claude with a structured analysis framework
@@ -129,7 +132,7 @@ import { createMyPromptTool } from './tools/my-prompt';
 const tools = [
   createGetIssueTool(jiraClient),
   createAnalyzeTicketTool(jiraClient),
-  createMyPromptTool(jiraClient),  // Add your tool
+  createMyPromptTool(jiraClient), // Add your tool
 ];
 ```
 
@@ -157,12 +160,14 @@ describe('myPrompt', () => {
 ### Separation of Concerns
 
 **Prompt Logic** (`src/prompts/`)
+
 - Fetches data
 - Formats data for Claude
 - Creates the structured prompt message
 - Contains business logic
 
 **Tool Wrapper** (`src/tools/`)
+
 - Provides the MCP tool interface
 - Validates inputs using Zod
 - Handles errors
@@ -196,13 +201,9 @@ describe('myPrompt', () => {
 ### Usage
 
 ```typescript
-const result = await executeAnalyzeTicketPrompt(
-  { issueKey: 'PROJ-1234' },
-  jiraClient
-);
+const result = await executeAnalyzeTicketPrompt({ issueKey: 'PROJ-1234' }, jiraClient);
 
 console.log(result.content);
-
 ```
 
 ### The Prompt Message Structure
@@ -254,11 +255,13 @@ it('should handle API errors gracefully', async () => {
 Don't include everything in the prompt. Focus on what's relevant for the analysis.
 
 **Bad:**
+
 ```typescript
 return `Here's all the data: ${JSON.stringify(allData)}`;
 ```
 
 **Good:**
+
 ```typescript
 return `**Key Information:**
 - Summary: ${data.summary}
@@ -271,11 +274,13 @@ return `**Key Information:**
 Claude needs clear, specific instructions.
 
 **Bad:**
+
 ```typescript
 return `Analyze this ticket: ${ticketData}`;
 ```
 
 **Good:**
+
 ```typescript
 return `Please analyze this ticket and provide:
 1. **Complexity Assessment** (Low/Medium/High)
@@ -295,7 +300,7 @@ try {
 } catch (error) {
   return {
     content: '',
-    error: error.message || 'Unknown error'
+    error: error.message || 'Unknown error',
   };
 }
 ```

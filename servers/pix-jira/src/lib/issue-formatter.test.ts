@@ -3,81 +3,82 @@ import { formatIssue, formatIssueSummary } from './issue-formatter.js';
 import type { JiraIssue } from '../types/jira.js';
 
 describe('issue-formatter', () => {
-  const createMockIssue = (overrides?: Partial<JiraIssue>): JiraIssue => ({
-    key: 'PROJ-1234',
-    self: 'https://YOURWORKSPACE.atlassian.net/rest/api/3/issue/12345',
-    fields: {
-      summary: 'Test issue summary',
-      description: 'Test description',
-      status: {
-        name: 'In Progress',
-        statusCategory: { name: 'Doing' },
-      },
-      assignee: {
-        displayName: 'John Doe',
-      },
-      reporter: {
-        displayName: 'Jane Doe',
-      },
-      priority: {
-        name: 'High',
-      },
-      created: '2025-01-01T10:00:00.000Z',
-      updated: '2025-01-02T15:30:00.000Z',
-      labels: ['backend', 'bug'],
-      fixVersions: [
-        {
-          name: 'v1.0.0',
-          released: true,
-          releaseDate: '2025-01-15',
+  const createMockIssue = (overrides?: Partial<JiraIssue>): JiraIssue =>
+    ({
+      key: 'PROJ-1234',
+      self: 'https://YOURWORKSPACE.atlassian.net/rest/api/3/issue/12345',
+      fields: {
+        summary: 'Test issue summary',
+        description: 'Test description',
+        status: {
+          name: 'In Progress',
+          statusCategory: { name: 'Doing' },
         },
-      ],
-      issuetype: {
-        name: 'Bug',
-      },
-      project: {
-        key: 'PIX',
-        name: 'Pix',
-      },
-      parent: {
-        key: 'PROJ-1000',
-        fields: {
-          summary: 'Parent epic',
-          issuetype: { name: 'Epic' },
+        assignee: {
+          displayName: 'John Doe',
         },
-      },
-      issuelinks: [
-        {
-          type: {
-            inward: 'is blocked by',
-            outward: 'blocks',
-          },
-          outwardIssue: {
-            key: 'PROJ-2000',
-            fields: {
-              summary: 'Blocking issue',
-            },
-          },
+        reporter: {
+          displayName: 'Jane Doe',
         },
-      ],
-      comment: {
-        total: 2,
-        comments: [
+        priority: {
+          name: 'High',
+        },
+        created: '2025-01-01T10:00:00.000Z',
+        updated: '2025-01-02T15:30:00.000Z',
+        labels: ['backend', 'bug'],
+        fixVersions: [
           {
-            author: { displayName: 'Alice' },
-            body: 'First comment',
-            created: '2025-01-01T12:00:00.000Z',
-          },
-          {
-            author: { displayName: 'Bob' },
-            body: 'Second comment',
-            created: '2025-01-02T14:00:00.000Z',
+            name: 'v1.0.0',
+            released: true,
+            releaseDate: '2025-01-15',
           },
         ],
+        issuetype: {
+          name: 'Bug',
+        },
+        project: {
+          key: 'PIX',
+          name: 'Pix',
+        },
+        parent: {
+          key: 'PROJ-1000',
+          fields: {
+            summary: 'Parent epic',
+            issuetype: { name: 'Epic' },
+          },
+        },
+        issuelinks: [
+          {
+            type: {
+              inward: 'is blocked by',
+              outward: 'blocks',
+            },
+            outwardIssue: {
+              key: 'PROJ-2000',
+              fields: {
+                summary: 'Blocking issue',
+              },
+            },
+          },
+        ],
+        comment: {
+          total: 2,
+          comments: [
+            {
+              author: { displayName: 'Alice' },
+              body: 'First comment',
+              created: '2025-01-01T12:00:00.000Z',
+            },
+            {
+              author: { displayName: 'Bob' },
+              body: 'Second comment',
+              created: '2025-01-02T14:00:00.000Z',
+            },
+          ],
+        },
       },
-    },
-    ...overrides,
-  } as JiraIssue);
+      ...overrides,
+    }) as JiraIssue;
 
   describe('formatIssue', () => {
     it('should format issue with all sections', () => {
@@ -282,15 +283,11 @@ describe('issue-formatter', () => {
         content: [
           {
             type: 'paragraph',
-            content: [
-              { type: 'text', text: 'First paragraph' },
-            ],
+            content: [{ type: 'text', text: 'First paragraph' }],
           },
           {
             type: 'paragraph',
-            content: [
-              { type: 'text', text: 'Second paragraph' },
-            ],
+            content: [{ type: 'text', text: 'Second paragraph' }],
           },
         ],
       };
@@ -302,10 +299,7 @@ describe('issue-formatter', () => {
 
     it('should handle custom fields (equipix)', () => {
       const issue = createMockIssue();
-      (issue.fields as any).customfield_10253 = [
-        { name: 'Team A' },
-        { name: 'Team B' },
-      ];
+      (issue.fields as any).customfield_10253 = [{ name: 'Team A' }, { name: 'Team B' }];
       const result = formatIssue(issue);
 
       expect(result).toContain('## Pix Custom Fields');

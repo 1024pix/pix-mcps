@@ -40,10 +40,7 @@ describe('analyze-ticket tool', () => {
       const tool = createAnalyzeTicketTool(mockJiraClient);
       const result = await tool.handler({ issueKey: 'PROJ-1234' });
 
-      expect(executeAnalyzeTicketPrompt).toHaveBeenCalledWith(
-        { issueKey: 'PROJ-1234' },
-        mockJiraClient,
-      );
+      expect(executeAnalyzeTicketPrompt).toHaveBeenCalledWith({ issueKey: 'PROJ-1234' }, mockJiraClient);
 
       expect(result).toEqual({
         content: [{ type: 'text', text: 'Analysis prompt for PROJ-1234' }],
@@ -58,10 +55,7 @@ describe('analyze-ticket tool', () => {
       // Note: Zod validation expects uppercase before normalization
       await tool.handler({ issueKey: 'PROJ-1234' });
 
-      expect(executeAnalyzeTicketPrompt).toHaveBeenCalledWith(
-        { issueKey: 'PROJ-1234' },
-        mockJiraClient,
-      );
+      expect(executeAnalyzeTicketPrompt).toHaveBeenCalledWith({ issueKey: 'PROJ-1234' }, mockJiraClient);
     });
 
     it('should handle prompt execution errors', async () => {

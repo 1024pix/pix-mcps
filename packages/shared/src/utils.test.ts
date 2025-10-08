@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createSuccessResponse, createErrorResponse, validateEnvVars, formatJson, createLogger } from './utils.js';
 
 describe('utils', () => {
@@ -103,16 +103,14 @@ describe('utils', () => {
     it('should throw when a required var is missing', () => {
       process.env.VAR1 = 'value1';
 
-      expect(() => validateEnvVars(['VAR1', 'VAR2'])).toThrow(
-        'Missing required environment variables: VAR2'
-      );
+      expect(() => validateEnvVars(['VAR1', 'VAR2'])).toThrow('Missing required environment variables: VAR2');
     });
 
     it('should throw when multiple vars are missing', () => {
       process.env.VAR1 = 'value1';
 
       expect(() => validateEnvVars(['VAR1', 'VAR2', 'VAR3'])).toThrow(
-        'Missing required environment variables: VAR2, VAR3'
+        'Missing required environment variables: VAR2, VAR3',
       );
     });
 
@@ -123,17 +121,13 @@ describe('utils', () => {
     it('should treat undefined as missing', () => {
       process.env.VAR1 = undefined;
 
-      expect(() => validateEnvVars(['VAR1'])).toThrow(
-        'Missing required environment variables: VAR1'
-      );
+      expect(() => validateEnvVars(['VAR1'])).toThrow('Missing required environment variables: VAR1');
     });
 
     it('should treat empty string as missing', () => {
       process.env.VAR1 = '';
 
-      expect(() => validateEnvVars(['VAR1'])).toThrow(
-        'Missing required environment variables: VAR1'
-      );
+      expect(() => validateEnvVars(['VAR1'])).toThrow('Missing required environment variables: VAR1');
     });
   });
 

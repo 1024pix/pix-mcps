@@ -1,6 +1,6 @@
 # Anthropic TypeScript Agent SDK Reference
 
-> **⚠️ Note:** This document is kept for reference purposes only. The MCP servers in this monorepo use the [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) package instead. The Anthropic Agent SDK is designed for building applications that *use* MCP servers, not for building the servers themselves.
+> **⚠️ Note:** This document is kept for reference purposes only. The MCP servers in this monorepo use the [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) package instead. The Anthropic Agent SDK is designed for building applications that _use_ MCP servers, not for building the servers themselves.
 
 This document contains information about the Anthropic TypeScript Agent SDK, which can be useful for understanding MCP concepts and building client applications.
 
@@ -43,23 +43,18 @@ import { query, tool } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
 
 // Create a tool
-const myTool = tool(
-  'ExampleTool',
-  'Demonstrates tool creation',
-  { input: z.string() },
-  async (args) => {
-    // Tool implementation
-    return { content: [{ type: "text", text: "Result" }] };
-  }
-);
+const myTool = tool('ExampleTool', 'Demonstrates tool creation', { input: z.string() }, async (args) => {
+  // Tool implementation
+  return { content: [{ type: 'text', text: 'Result' }] };
+});
 
 // Run a query
 const result = query({
-  prompt: "Help me with a task",
+  prompt: 'Help me with a task',
   options: {
     tools: [myTool],
-    model: 'claude-3-sonnet'
-  }
+    model: 'claude-3-sonnet',
+  },
 });
 ```
 
@@ -111,22 +106,22 @@ MCP servers are configured in `.mcp.json` at the project root:
 ### Using MCP in Code
 
 ```typescript
-import { query } from "@anthropic-ai/claude-agent-sdk";
+import { query } from '@anthropic-ai/claude-agent-sdk';
 
 for await (const message of query({
-  prompt: "List files in my project",
+  prompt: 'List files in my project',
   options: {
     mcpServers: {
-      "filesystem": {
-        command: "npx",
-        args: ["@modelcontextprotocol/server-filesystem"],
+      filesystem: {
+        command: 'npx',
+        args: ['@modelcontextprotocol/server-filesystem'],
         env: {
-          ALLOWED_PATHS: "/Users/me/projects"
-        }
-      }
+          ALLOWED_PATHS: '/Users/me/projects',
+        },
+      },
     },
-    allowedTools: ["mcp__filesystem__list_files"]
-  }
+    allowedTools: ['mcp__filesystem__list_files'],
+  },
 })) {
   // Process results
 }
@@ -143,11 +138,11 @@ import { tool } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
 
 const myTool = tool(
-  "tool_name",
-  "Clear description of what this tool does",
+  'tool_name',
+  'Clear description of what this tool does',
   {
-    parameter1: z.string().describe("Description of parameter1"),
-    parameter2: z.number().optional().describe("Optional parameter description")
+    parameter1: z.string().describe('Description of parameter1'),
+    parameter2: z.number().optional().describe('Optional parameter description'),
   },
   async (args) => {
     try {
@@ -155,21 +150,25 @@ const myTool = tool(
       const result = await performOperation(args.parameter1, args.parameter2);
 
       return {
-        content: [{
-          type: "text",
-          text: JSON.stringify(result)
-        }]
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result),
+          },
+        ],
       };
     } catch (error) {
       return {
-        content: [{
-          type: "text",
-          text: `Error: ${error.message}`
-        }],
-        isError: true
+        content: [
+          {
+            type: 'text',
+            text: `Error: ${error.message}`,
+          },
+        ],
+        isError: true,
       };
     }
-  }
+  },
 );
 ```
 
@@ -186,30 +185,25 @@ import { createSdkMcpServer, tool } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
 
 const server = createSdkMcpServer({
-  serverName: "my-custom-server",
+  serverName: 'my-custom-server',
   tools: [
+    tool('get_data', 'Retrieves data from a source', { id: z.string() }, async (args) => {
+      // Implementation
+      return { content: [{ type: 'text', text: 'Data' }] };
+    }),
     tool(
-      "get_data",
-      "Retrieves data from a source",
-      { id: z.string() },
-      async (args) => {
-        // Implementation
-        return { content: [{ type: "text", text: "Data" }] };
-      }
-    ),
-    tool(
-      "update_data",
-      "Updates data in the system",
+      'update_data',
+      'Updates data in the system',
       {
         id: z.string(),
-        value: z.string()
+        value: z.string(),
       },
       async (args) => {
         // Implementation
-        return { content: [{ type: "text", text: "Updated" }] };
-      }
-    )
-  ]
+        return { content: [{ type: 'text', text: 'Updated' }] };
+      },
+    ),
+  ],
 });
 ```
 
@@ -226,9 +220,9 @@ const server = createSdkMcpServer({
 
 ```typescript
 const schema = {
-  url: z.string().url().describe("Valid HTTP/HTTPS URL"),
-  timeout: z.number().min(0).max(30000).optional().describe("Timeout in milliseconds"),
-  method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).describe("HTTP method")
+  url: z.string().url().describe('Valid HTTP/HTTPS URL'),
+  timeout: z.number().min(0).max(30000).optional().describe('Timeout in milliseconds'),
+  method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).describe('HTTP method'),
 };
 ```
 
@@ -249,14 +243,20 @@ Always return structured responses:
 
 ```typescript
 return {
-  content: [{
-    type: "text",
-    text: JSON.stringify({
-      success: true,
-      data: result,
-      metadata: { timestamp: Date.now() }
-    }, null, 2)
-  }]
+  content: [
+    {
+      type: 'text',
+      text: JSON.stringify(
+        {
+          success: true,
+          data: result,
+          metadata: { timestamp: Date.now() },
+        },
+        null,
+        2,
+      ),
+    },
+  ],
 };
 ```
 

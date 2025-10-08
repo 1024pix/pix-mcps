@@ -22,12 +22,14 @@ This document captures key learnings, patterns, and gotchas discovered while bui
 **Decision:** Use npm workspaces for a monorepo with multiple MCP servers.
 
 **Rationale:**
+
 - **Shared utilities**: Common code (logger, response helpers, types) reused across MCPs
 - **Consistent tooling**: Single ESLint, Prettier, TypeScript config
 - **Easy dependency management**: Update shared packages once, affects all servers
 - **Developer experience**: Test and build all servers with single commands
 
 **Alternative considered:** Separate repos per MCP
+
 - **Rejected because:** Too much duplication, hard to maintain consistency
 
 ### Why Pino for Logging?
@@ -35,15 +37,17 @@ This document captures key learnings, patterns, and gotchas discovered while bui
 **Decision:** Use Pino instead of console.log or Winston.
 
 **Rationale:**
+
 - **Performance**: Pino is one of the fastest Node.js loggers (benchmarked)
 - **Structured logs**: JSON output in production makes parsing/monitoring easy
 - **Pretty dev mode**: `pino-pretty` provides great colored output in development
 - **Low overhead**: Minimal performance impact on MCP server
 
 **Implementation:**
+
 ```typescript
 const logger = createLogger('my-server');
-logger.info('Server started');  // Pretty in dev, JSON in prod
+logger.info('Server started'); // Pretty in dev, JSON in prod
 ```
 
 ### Why Self-Documenting Code?
@@ -51,12 +55,14 @@ logger.info('Server started');  // Pretty in dev, JSON in prod
 **Decision:** Extract functions with meaningful names instead of inline comments.
 
 **Rationale:**
+
 - **Pix standard**: Matches existing Pix codebase conventions
 - **Easier to test**: Small functions can be unit tested independently
 - **Better maintainability**: Intent is clear from function names
 - **Reduces noise**: No need to update comments when code changes
 
 **Before:**
+
 ```typescript
 // Parse error response and format message
 const error = await response.json();
@@ -67,6 +73,7 @@ if (error.errorMessages) {
 ```
 
 **After:**
+
 ```typescript
 const errorMessage = await extractErrorMessage(response);
 return formatUserFriendlyError(errorMessage);
@@ -77,6 +84,7 @@ return formatUserFriendlyError(errorMessage);
 **Decision:** Use Zod instead of Joi for this project.
 
 **Rationale:**
+
 - **SDK requirement**: Anthropic SDK's `tool()` function requires Zod schemas
 - **Type inference**: Automatic TypeScript type generation from schemas
 - **Runtime validation**: Validates environment variables and tool inputs
@@ -91,6 +99,7 @@ return formatUserFriendlyError(errorMessage);
 **Discovery:** MCP servers using the Anthropic SDK don't have explicit start/stop methods.
 
 **How it works:**
+
 ```typescript
 createSdkMcpServer({
   name: 'pix-jira',
@@ -101,6 +110,7 @@ createSdkMcpServer({
 ```
 
 **Implication:**
+
 - Server initialization must complete before `createSdkMcpServer()` is called
 - Connection tests should run before server creation
 - Errors during init should exit the process (no graceful recovery)
@@ -112,6 +122,7 @@ createSdkMcpServer({
 **Pattern:** `mcp__{server-name}__{tool-name}`
 
 **Example:**
+
 ```typescript
 // Server name: 'pix-jira'
 // Tool name: 'get_issue'
@@ -119,6 +130,7 @@ createSdkMcpServer({
 ```
 
 **Best practice:**
+
 - Keep tool names short and descriptive
 - Use snake_case for tool names
 - Server name should match package name
@@ -128,6 +140,7 @@ createSdkMcpServer({
 **Discovery:** Zod schemas define both validation AND the input interface for tools.
 
 **Pattern:**
+
 ```typescript
 tool(
   'get_issue',
@@ -143,13 +156,13 @@ tool(
       .describe('Help text for Claude'),
 
     // Optional parameters need .optional() or .default()
-    includeComments: z.boolean().optional().default(true)
+    includeComments: z.boolean().optional().default(true),
   },
   async (args) => {
     // args is fully typed from schema
     const key: string = args.issueKey;
-  }
-)
+  },
+);
 ```
 
 **Gotcha:** Validation error messages from regex are shown to users, so make them friendly!
@@ -159,17 +172,21 @@ tool(
 **Discovery:** MCP responses have a specific structure that Claude expects.
 
 **Required format:**
+
 ```typescript
 return {
-  content: [{
-    type: 'text',  // or 'image', 'resource'
-    text: 'Your response here'
-  }],
-  isError: false  // Optional, set to true for errors
+  content: [
+    {
+      type: 'text', // or 'image', 'resource'
+      text: 'Your response here',
+    },
+  ],
+  isError: false, // Optional, set to true for errors
 };
 ```
 
 **Best practice:**
+
 - Create helper functions (done in `@pix-mcps/shared`)
 - Always return structured responses, never throw in tool functions
 - Use `isError: true` for non-fatal errors Claude should handle
@@ -179,9 +196,10 @@ return {
 **Discovery:** Different approaches for loading env vars in different contexts.
 
 **Pattern used:**
+
 ```typescript
 // In src files
-import 'dotenv/config';  // Auto-loads .env
+import 'dotenv/config'; // Auto-loads .env
 
 // In test scripts (ESM)
 import { config } from 'dotenv';
@@ -201,6 +219,7 @@ config({ path: resolve(__dirname, '.env') });
 **Note:** MCP servers use the official MCP SDK, not the Anthropic Agent SDK.
 
 **Installation:**
+
 ```bash
 npm install @modelcontextprotocol/sdk
 ```
@@ -208,6 +227,7 @@ npm install @modelcontextprotocol/sdk
 ### Server Setup Pattern
 
 **Pattern discovered:**
+
 ```typescript
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -234,6 +254,7 @@ await server.connect(transport);
 ```
 
 **Key points:**
+
 - Server communicates over stdin/stdout using JSON-RPC
 - Must implement both ListToolsRequestSchema and CallToolRequestSchema handlers
 - Tools return `{ content: [{ type: 'text', text: '...' }] }` format
@@ -242,15 +263,17 @@ await server.connect(transport);
 ### Server Configuration
 
 **Minimal config:**
+
 ```typescript
 createSdkMcpServer({
-  name: 'server-name',  // Required
-  version: '1.0.0',     // Required
-  tools: [tool1, tool2] // Required
+  name: 'server-name', // Required
+  version: '1.0.0', // Required
+  tools: [tool1, tool2], // Required
 });
 ```
 
 **Notes:**
+
 - No need to specify capabilities explicitly
 - Tools are auto-registered from array
 - Server name should match `.mcp.json` config
@@ -270,9 +293,10 @@ const fields = await fetch(`${baseUrl}/rest/api/3/field`);
 ```
 
 **Pattern:**
+
 ```typescript
 const PIX_CUSTOM_FIELDS = {
-  EQUIPIX: 'customfield_10253',  // Map meaningful names to IDs
+  EQUIPIX: 'customfield_10253', // Map meaningful names to IDs
   APPLI_PIX: 'customfield_10117',
 } as const;
 ```
@@ -321,6 +345,7 @@ function extractCustomFieldValue(value: unknown): string | null {
 **Discovery:** JIRA description can be Atlassian Document Format (JSON) or plain text.
 
 **ADF structure:**
+
 ```json
 {
   "type": "doc",
@@ -328,9 +353,7 @@ function extractCustomFieldValue(value: unknown): string | null {
   "content": [
     {
       "type": "paragraph",
-      "content": [
-        { "type": "text", "text": "Actual text here" }
-      ]
+      "content": [{ "type": "text", "text": "Actual text here" }]
     }
   ]
 }
@@ -356,13 +379,15 @@ function extractTextFromADF(adf: any): string {
 **Discovery:** JIRA Cloud no longer accepts passwords, only API tokens.
 
 **Pattern:**
+
 ```typescript
-const credentials = `${email}:${apiToken}`;  // Not password!
+const credentials = `${email}:${apiToken}`; // Not password!
 const base64 = Buffer.from(credentials).toString('base64');
 const authHeader = `Basic ${base64}`;
 ```
 
 **Important:**
+
 - Tokens are tied to a user account
 - Tokens can have expiration dates (check JIRA docs for current policy)
 - Tokens should be rotated periodically
@@ -372,6 +397,7 @@ const authHeader = `Basic ${base64}`;
 **Discovery:** Can request all custom fields with wildcard.
 
 **Pattern:**
+
 ```typescript
 const fields = ['summary', 'description', 'customfield_*'];
 //                                          ^^^^^^^^^^^^^^ Gets all custom fields
@@ -387,21 +413,23 @@ const fields = ['summary', 'description', 'customfield_*'];
 ### Process Used
 
 1. **Fetch a real issue** with all custom fields:
+
    ```typescript
    const issue = await client.getIssue('PROJ-19670');
-   const customFields = Object.keys(issue.fields)
-     .filter(key => key.startsWith('customfield_'));
+   const customFields = Object.keys(issue.fields).filter((key) => key.startsWith('customfield_'));
    ```
 
 2. **Query field metadata**:
+
    ```typescript
    const fieldDefs = await fetch('/rest/api/3/field');
-   const custom = fieldDefs.filter(f => customFields.includes(f.id));
+   const custom = fieldDefs.filter((f) => customFields.includes(f.id));
    ```
 
 3. **Map IDs to names**:
+
    ```typescript
-   custom.forEach(field => {
+   custom.forEach((field) => {
      console.log(`${field.id}: ${field.name}`);
    });
    ```
@@ -418,11 +446,13 @@ const fields = ['summary', 'description', 'customfield_*'];
 When Pix adds a new custom field:
 
 1. **Find the field ID** using field inspector:
+
    ```bash
    node --import tsx servers/pix-jira/inspect-fields.ts PIX-XXXXX
    ```
 
 2. **Add to constants** in `issue-formatter.ts`:
+
    ```typescript
    const PIX_CUSTOM_FIELDS = {
      NEW_FIELD: 'customfield_XXXXX',
@@ -430,6 +460,7 @@ When Pix adds a new custom field:
    ```
 
 3. **Add extraction logic** in `extractCustomFields()`:
+
    ```typescript
    if (fields[PIX_CUSTOM_FIELDS.NEW_FIELD]) {
      const value = extractCustomFieldValue(fields[PIX_CUSTOM_FIELDS.NEW_FIELD]);
@@ -477,6 +508,7 @@ class JiraClient {
 ```
 
 **Benefits:**
+
 - Each function has a single responsibility
 - Easy to test error scenarios
 - Error messages are centralized
@@ -499,6 +531,7 @@ export function formatIssue(issue: JiraIssue): string {
 ```
 
 **Benefits:**
+
 - Each section can be tested independently
 - Easy to add/remove/reorder sections
 - Sections that return empty string are filtered out
@@ -517,11 +550,12 @@ export function loadConfig(): Config {
 }
 
 // In main
-const config = loadConfig();  // Fails fast if invalid
+const config = loadConfig(); // Fails fast if invalid
 const client = new JiraClient(config);
 ```
 
 **Benefits:**
+
 - Fails immediately if config is wrong
 - Type-safe config throughout app
 - No need to access process.env everywhere
@@ -537,7 +571,7 @@ const client = new JiraClient(config);
 describe('extractCustomFields', () => {
   it('should extract Equipe Pix', () => {
     const fields = {
-      customfield_10253: [{ value: 'Certification' }]
+      customfield_10253: [{ value: 'Certification' }],
     };
     const result = extractCustomFields(fields);
     expect(result['Equipe Pix']).toBe('Certification');
@@ -568,6 +602,7 @@ async function manualTest() {
 ```
 
 **Benefits:**
+
 - Validates against real JIRA
 - Catches API changes early
 - Tests full integration path
@@ -577,6 +612,7 @@ async function manualTest() {
 ### Test-Driven Development for Custom Fields
 
 **Process:**
+
 1. Fetch real data, save to file
 2. Write test with expected output
 3. Implement extraction logic
@@ -603,12 +639,14 @@ expect(result['Equipe Pix']).toBe('Certification');
 **Problem:** Changes to code don't reflect in tests.
 
 **Solution:**
+
 ```bash
 npm run build --workspace=servers/pix-jira
 # Then run tests
 ```
 
 **Better:** Use `tsx` to run TypeScript directly:
+
 ```bash
 node --import tsx servers/pix-jira/manual-test.ts
 ```
@@ -618,9 +656,10 @@ node --import tsx servers/pix-jira/manual-test.ts
 **Problem:** `require()` doesn't work, `__dirname` not defined.
 
 **Solution:** This is an ESM project:
+
 ```typescript
 // ✓ Correct
-import { thing } from './module.js';  // Note .js extension
+import { thing } from './module.js'; // Note .js extension
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ✗ Wrong
@@ -632,6 +671,7 @@ const thing = require('./module');
 **Problem:** Accidentally logging API tokens or user data.
 
 **Solution:**
+
 - Never log `process.env` directly
 - Sanitize error messages before logging
 - Use Pino's serializers to redact sensitive fields
@@ -643,8 +683,8 @@ const logger = pino({
       method: req.method,
       url: req.url,
       // Don't include headers (may have auth)
-    })
-  }
+    }),
+  },
 });
 ```
 
@@ -653,12 +693,13 @@ const logger = pino({
 **Problem:** JIRA fields can be null, causing errors.
 
 **Solution:** Check before accessing:
+
 ```typescript
 // ✓ Safe
 const assignee = fields.assignee?.displayName || 'Unassigned';
 
 // ✗ Unsafe
-const assignee = fields.assignee.displayName;  // Crashes if null
+const assignee = fields.assignee.displayName; // Crashes if null
 ```
 
 ### 5. Hardcoding URLs or IDs
@@ -666,6 +707,7 @@ const assignee = fields.assignee.displayName;  // Crashes if null
 **Problem:** Code breaks when moved to different JIRA instance.
 
 **Solution:** Use environment variables:
+
 ```typescript
 // ✓ Configurable
 const baseUrl = config.jiraBaseUrl;
@@ -686,7 +728,7 @@ const fields = ['summary', 'status', 'assignee'];
 const issue = await client.getIssue(key, fields);
 
 // Wasteful: All fields
-const issue = await client.getIssue(key);  // Gets everything
+const issue = await client.getIssue(key); // Gets everything
 ```
 
 ### 2. Pino Logger Performance
@@ -694,6 +736,7 @@ const issue = await client.getIssue(key);  // Gets everything
 **Discovery:** Pino is very fast, but still has overhead.
 
 **Best practice:**
+
 ```typescript
 // Conditional debug logging
 if (process.env.LOG_LEVEL === 'debug') {
@@ -728,6 +771,7 @@ class JiraClient {
 **Discovery:** The Anthropic SDK doesn't yet have native prompt support, but prompts can be implemented as tools that return structured analysis frameworks.
 
 **Pattern:**
+
 ```typescript
 // Prompt logic (src/prompts/analyze-ticket.ts)
 export async function executeAnalyzeTicketPrompt(
@@ -749,7 +793,7 @@ export function createAnalyzeTicketTool(jiraClient: JiraClient) {
     async (args) => {
       const result = await executeAnalyzeTicketPrompt(args, jiraClient);
       return result.error ? createErrorResponse(result.error) : createSuccessResponse(result.content);
-    }
+    },
   );
 }
 ```
@@ -786,6 +830,7 @@ export function createAnalyzeTicketTool(jiraClient: JiraClient) {
    - Verify issue key normalization (lowercase → uppercase)
 
 **Benefits of this pattern:**
+
 - Prompt logic is fully testable without MCP infrastructure
 - Can reuse same prompt with different tool interfaces
 - Clear separation makes future SDK prompt support easy to adopt
@@ -793,6 +838,7 @@ export function createAnalyzeTicketTool(jiraClient: JiraClient) {
 
 **Future SDK support:**
 When native prompts are supported:
+
 ```typescript
 createSdkMcpServer({
   name: 'pix-jira',
@@ -808,6 +854,7 @@ createSdkMcpServer({
 **Potential tools to add:**
 
 - `search_issues`: JQL-based search
+
   ```typescript
   tool('search_issues', 'Search JIRA using JQL', {
     jql: z.string().describe('JQL query'),
@@ -824,6 +871,7 @@ createSdkMcpServer({
 
 **Current:** Just shows repository count
 **Future:** Parse and display:
+
 - Branch names
 - PR titles and statuses
 - Commit counts
@@ -831,11 +879,12 @@ createSdkMcpServer({
 ### 3. Attachment Support
 
 **Future:** Download and display attachment info:
+
 ```typescript
-const attachments = fields.attachment.map(a => ({
+const attachments = fields.attachment.map((a) => ({
   filename: a.filename,
   size: a.size,
-  url: a.content
+  url: a.content,
 }));
 ```
 
@@ -847,8 +896,8 @@ const attachments = fields.attachment.map(a => ({
 async function discoverCustomFields(client: JiraClient) {
   const metadata = await client.getFieldMetadata();
   const pixFields = metadata
-    .filter(f => f.name.includes('Pix') || f.name.includes('Equipe'))
-    .map(f => ({ id: f.id, name: f.name }));
+    .filter((f) => f.name.includes('Pix') || f.name.includes('Equipe'))
+    .map((f) => ({ id: f.id, name: f.name }));
   // Store in config or cache
 }
 ```
@@ -907,4 +956,3 @@ Use these learnings as a foundation when building new MCP servers or extending t
 - [ ] Test with curl/fetch to isolate API vs SDK issues
 - [ ] Verify TypeScript types are correct
 - [ ] Check that custom field IDs haven't changed
-

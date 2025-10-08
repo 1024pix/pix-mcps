@@ -11,6 +11,7 @@
 ### Tools
 
 Tools are **action-oriented functions** that Claude can invoke to:
+
 - Retrieve data
 - Create/update/delete resources
 - Execute operations
@@ -21,6 +22,7 @@ Tools are **action-oriented functions** that Claude can invoke to:
 ### Prompts
 
 Prompts are **analysis frameworks** that:
+
 - Provide context to Claude
 - Include structured instructions
 - Guide Claude's reasoning process
@@ -62,7 +64,7 @@ Why? Status checking is a straightforward data retrieval.
 ### Real Example: get_issue Tool
 
 ```typescript
-tool('get_issue', 'Retrieves JIRA issue details', { issueKey: z.string() })
+tool('get_issue', 'Retrieves JIRA issue details', { issueKey: z.string() });
 ```
 
 **Purpose**: Fetch and display issue data
@@ -103,7 +105,7 @@ Why? Security review requires expert analysis, not just checks.
 ### Real Example: analyze_ticket Prompt
 
 ```typescript
-prompt('analyze_ticket', 'Provides technical analysis framework for a JIRA ticket')
+prompt('analyze_ticket', 'Provides technical analysis framework for a JIRA ticket');
 ```
 
 **Purpose**: Guide Claude to analyze ticket complexity, risks, and dependencies
@@ -114,17 +116,18 @@ prompt('analyze_ticket', 'Provides technical analysis framework for a JIRA ticke
 
 ### Scenario: JIRA Ticket Information
 
-| Aspect | Tool: `get_issue` | Prompt: `analyze_ticket` |
-|--------|------------------|--------------------------|
-| **Purpose** | Retrieve ticket data | Analyze ticket implications |
-| **Claude's role** | Display formatter | Expert analyst |
-| **Output type** | Structured data | Reasoned insights |
-| **User gets** | "Here's the ticket" | "Here's what this means" |
-| **Use when** | Need information | Need understanding |
+| Aspect            | Tool: `get_issue`    | Prompt: `analyze_ticket`    |
+| ----------------- | -------------------- | --------------------------- |
+| **Purpose**       | Retrieve ticket data | Analyze ticket implications |
+| **Claude's role** | Display formatter    | Expert analyst              |
+| **Output type**   | Structured data      | Reasoned insights           |
+| **User gets**     | "Here's the ticket"  | "Here's what this means"    |
+| **Use when**      | Need information     | Need understanding          |
 
 ### Example Outputs
 
 **Tool: get_issue**
+
 ```
 # PROJ-1234: Implement user authentication
 
@@ -139,6 +142,7 @@ Add OAuth2 authentication to the application
 ```
 
 **Prompt: analyze_ticket**
+
 ```
 Based on the ticket PROJ-1234, here's my analysis:
 
@@ -210,6 +214,7 @@ Complex: "Should we prioritize PROJ-1234?"
 ### Pattern 3: Prompt Wraps Tool
 
 In our implementation:
+
 - `analyze_ticket` tool wraps the `analyzeTicketPrompt` logic
 - The tool fetches data, the prompt logic formats it with analysis instructions
 - Claude then provides the analysis
@@ -219,25 +224,31 @@ In our implementation:
 ### Example 1: Code Review
 
 **Wrong: Code Review Tool**
+
 ```typescript
-tool('review_code', 'Reviews code for issues')
+tool('review_code', 'Reviews code for issues');
 ```
+
 This won't work because code review requires Claude's judgment.
 
 **Right: Code Review Prompt**
+
 ```typescript
-prompt('code_review', 'Provides framework for reviewing code quality, security, and maintainability')
+prompt('code_review', 'Provides framework for reviewing code quality, security, and maintainability');
 ```
 
 ### Example 2: Database Query
 
 **Right: Query Tool**
+
 ```typescript
-tool('query_database', 'Executes SQL query and returns results')
+tool('query_database', 'Executes SQL query and returns results');
 ```
+
 Fetching data is an action, not analysis.
 
 **Wrong: Database Query Prompt**
+
 ```typescript
 prompt('query_database', ...)  // ❌ Don't do this
 ```
@@ -245,13 +256,15 @@ prompt('query_database', ...)  // ❌ Don't do this
 ### Example 3: Data Visualization
 
 **Tool: For generating charts**
+
 ```typescript
-tool('generate_chart', 'Creates a chart from data')
+tool('generate_chart', 'Creates a chart from data');
 ```
 
 **Prompt: For interpreting trends**
+
 ```typescript
-prompt('analyze_trends', 'Framework for analyzing data trends and patterns')
+prompt('analyze_trends', 'Framework for analyzing data trends and patterns');
 ```
 
 ## Advanced Considerations
@@ -259,6 +272,7 @@ prompt('analyze_trends', 'Framework for analyzing data trends and patterns')
 ### Composition
 
 Prompts can call tools:
+
 ```
 analyze_sprint prompt
   ├─ get_issues tool
@@ -303,17 +317,18 @@ analyze_sprint prompt
 ❌ prompt('get_user_id', 'Returns user ID')
 ✅ tool('get_user_id', 'Returns user ID')
 ```
+
 If it's just data retrieval, it's a tool.
 
 ## Summary
 
-|  | Tools | Prompts |
-|--|-------|---------|
-| **Purpose** | Execute actions | Guide analysis |
-| **Claude's role** | Executor | Analyst |
-| **Output** | Data/Results | Insights |
-| **When** | "Do X" | "Analyze/Understand X" |
-| **Examples** | get_issue, create_ticket | analyze_ticket, security_review |
+|                   | Tools                    | Prompts                         |
+| ----------------- | ------------------------ | ------------------------------- |
+| **Purpose**       | Execute actions          | Guide analysis                  |
+| **Claude's role** | Executor                 | Analyst                         |
+| **Output**        | Data/Results             | Insights                        |
+| **When**          | "Do X"                   | "Analyze/Understand X"          |
+| **Examples**      | get_issue, create_ticket | analyze_ticket, security_review |
 
 ## Rule of Thumb
 
@@ -323,6 +338,7 @@ If it's just data retrieval, it's a tool.
 ---
 
 Need help deciding? Ask:
+
 1. Could a simple function do this without AI? → Tool
 2. Do I need Claude's reasoning? → Prompt
 3. Is the value in the data or the analysis? → Data=Tool, Analysis=Prompt

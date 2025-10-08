@@ -97,6 +97,7 @@ Creates an error response with error message.
 Creates a Pino logger instance with the specified name.
 
 **Features:**
+
 - Uses [Pino](https://github.com/pinojs/pino) for fast, structured logging
 - Automatically enables pretty printing in development mode
 - Respects `LOG_LEVEL` environment variable (debug, info, warn, error)

@@ -21,7 +21,8 @@ const analyzeTicketArgsSchema = z.object({
 export function createAnalyzeTicketTool(jiraClient: JiraClient) {
   return {
     name: 'analyze_ticket',
-    description: 'Prepares a detailed technical analysis of a JIRA ticket. Returns a structured prompt that asks for complexity assessment, potential risks, dependencies, and recommended development approach. Use this when you need to deeply understand the technical implications of a ticket.',
+    description:
+      'Prepares a detailed technical analysis of a JIRA ticket. Returns a structured prompt that asks for complexity assessment, potential risks, dependencies, and recommended development approach. Use this when you need to deeply understand the technical implications of a ticket.',
     schema: {
       type: 'object' as const,
       properties: {
@@ -54,9 +55,10 @@ export function createAnalyzeTicketTool(jiraClient: JiraClient) {
       } catch (error) {
         logger.error('Failed to prepare ticket analysis', error);
 
-        const errorMessage = error instanceof Error
-          ? `Failed to prepare analysis: ${error.message}`
-          : 'An unexpected error occurred while preparing ticket analysis.';
+        const errorMessage =
+          error instanceof Error
+            ? `Failed to prepare analysis: ${error.message}`
+            : 'An unexpected error occurred while preparing ticket analysis.';
 
         return {
           content: [{ type: 'text' as const, text: `Error: ${errorMessage}` }],

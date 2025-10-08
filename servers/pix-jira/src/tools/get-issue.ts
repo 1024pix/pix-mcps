@@ -46,7 +46,8 @@ const getIssueArgsSchema = z.object({
 export function createGetIssueTool(jiraClient: JiraClient) {
   return {
     name: 'get_issue',
-    description: 'Retrieves detailed information about a JIRA issue by its key (e.g., PROJ-1234). Returns comprehensive details including summary, description, status, assignee, priority, labels, fix versions, parent issue/epic, related issues, custom Pix fields (equipix, appli pix), development info (branches, PRs), and recent comments.',
+    description:
+      'Retrieves detailed information about a JIRA issue by its key (e.g., PROJ-1234). Returns comprehensive details including summary, description, status, assignee, priority, labels, fix versions, parent issue/epic, related issues, custom Pix fields (equipix, appli pix), development info (branches, PRs), and recent comments.',
     schema: {
       type: 'object' as const,
       properties: {
